@@ -1,0 +1,82 @@
+---
+title: "seeBias: Fairness Evaluation and Visualisation"
+output: 
+  github_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, 
+                      fig.width = 9, fig.height = 15)
+```
+
+## Demo
+
+### Usage
+
+```{r}
+library(seeBias)
+# Load example data
+data("compas")
+head(compas)
+table(compas$Two_yr_Recidivism, compas$Ethnicity)
+# Not sensible to analyse Asian and Native American as separate categories due
+# to insufficient observations. Combine into Other.
+compas$Ethnicity <- ifelse(compas$Ethnicity %in% c("Asian", "Native_American"),
+                           "Other", as.character(compas$Ethnicity))
+compas$Ethnicity <- ifelse(compas$Ethnicity == "African_American",
+                           "African American", as.character(compas$Ethnicity))
+table(compas$Two_yr_Recidivism, compas$Ethnicity)
+m <- glm(Two_yr_Recidivism ~ ., data = compas, family = "binomial")
+# Extracted predicted risk and observations from test data.
+# If not specified, the best threshold in ROC analysis is used.
+x <- evaluate_prediction(
+  y_pred = predict(m, newdata = compas, type = "response"), 
+  y_obs = compas$Two_yr_Recidivism, y_pos = "1",
+  sens_var = compas$Ethnicity, sens_var_ref = "Caucasian"
+)
+x_plots <- plot(x)
+```
+
+Compiled plot can be retrieved from:
+
+```{r, eval=FALSE}
+x_plots$overall
+```
+
+### Details on return values
+
+`seeBias` object:
+
+```{r}
+x$df_prob
+x$df_metrics
+x$df_auc
+x$df_calib
+head(x$df_roc)
+```
+
+Individual plots:
+
+```{r, fig.width=10, fig.height=6}
+x_plots$metrics
+```
+
+```{r, fig.width=4, fig.height=4}
+x_plots$roc
+x_plots$calibration_in_large
+x_plots$calibration
+x_plots$score
+```
+
+### Multiple sensitive variables
+
+```{r}
+x2 <- evaluate_prediction(
+  y_pred = predict(m, newdata = compas, type = "response"), 
+  y_obs = compas$Two_yr_Recidivism, y_pos = "1",
+  sens_var = cbind(as.character(compas$Ethnicity), as.character(compas$Sex)), 
+  sens_var_ref = c("Caucasian", "Male")
+)
+x_plots <- plot(x2, heights = c(2.5, 1, 1), print_statistics = FALSE)
+```
