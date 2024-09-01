@@ -7,7 +7,7 @@
 plot_calibration(x, print_statistics)
 }
 \arguments{
-\item{x}{\code{FairLite} object to plot}
+\item{x}{\code{seeBias} object}
 
 \item{print_statistics}{Whether to print calibration slope in the plot
 legend.}

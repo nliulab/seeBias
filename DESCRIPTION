@@ -15,12 +15,14 @@ Description: Visually assess performance bias of prediction by subgroups.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Imports: 
     pROC,
     rlang,
     ggplot2,
     dplyr,
     magrittr,
-    probably
+    probably, 
+    knitr,
+    tidyr
 Depends: R (>= 2.10)

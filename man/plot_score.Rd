@@ -7,7 +7,7 @@
 plot_score(x)
 }
 \arguments{
-\item{x}{\code{FairLite} object to plot}
+\item{x}{\code{seeBias} object}
 }
 \description{
 Private function to plot score distributions by label and subgroup

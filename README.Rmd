@@ -38,6 +38,10 @@ x <- evaluate_prediction_prob(
 x_plots <- plot(x)
 ```
 
+```{r results='asis'}
+summary(x)
+```
+
 ### Details on return values
 
 `seeBias` object:
@@ -75,6 +79,10 @@ x2 <- evaluate_prediction_prob(
 x_plots2 <- plot(x2, print_statistics = FALSE)
 ```
 
+```{r results='asis'}
+summary(x2)
+```
+
 ```{r, fig.width=4, fig.height=4}
 x_plots2$roc
 x_plots2$calibration_in_large
@@ -92,6 +100,10 @@ x3 <- evaluate_prediction_score(
   sens_var_ref = c("Caucasian", "Male")
 )
 x_plots3 <- plot(x3, print_statistics = FALSE)
+```
+
+```{r results='asis'}
+summary(x3)
 ```
 
 ```{r, fig.width=4, fig.height=4}

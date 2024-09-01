@@ -7,7 +7,7 @@
 plot_metrics(x)
 }
 \arguments{
-\item{x}{\code{FairLite} object to plot}
+\item{x}{\code{seeBias} object}
 }
 \description{
 Private function to plot fairness metrics

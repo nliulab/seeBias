@@ -2,6 +2,11 @@
 % Please edit documentation in R/evaluate_prediction.R
 \name{evaluate_prediction_prob}
 \alias{evaluate_prediction_prob}
+\alias{evaluate_prediction_score}
+\alias{evaluate_prediction_bin}
+\alias{plot.seeBias}
+\alias{summary.seeBias}
+\alias{print.summary.seeBias}
 \title{Evaluate algorithm fairness across patient subgroups based on predicted probabilities}
 \usage{
 evaluate_prediction_prob(
@@ -12,9 +17,32 @@ evaluate_prediction_prob(
   sens_var,
   sens_var_ref = NULL
 )
+
+evaluate_prediction_score(
+  y_pred,
+  y_pred_threshold = NULL,
+  y_obs,
+  y_pos = "1",
+  sens_var,
+  sens_var_ref = NULL
+)
+
+evaluate_prediction_bin(
+  y_pred,
+  y_obs,
+  y_pos = "1",
+  sens_var,
+  sens_var_ref = NULL
+)
+
+\method{plot}{seeBias}(x, print_statistics = TRUE, y = NULL, ...)
+
+\method{summary}{seeBias}(object, ...)
+
+\method{print}{summary.seeBias}(object, ..., digits = 3, metric_type = "difference")
 }
 \arguments{
-\item{y_pred}{A numeric vector of predicted probabilities. Should not contain
+\item{y_pred}{A vector of predicted outcome labels. Should not contain
 missing value.}
 
 \item{y_pred_threshold}{Threshold for \code{y_pred}. Predict positive label
@@ -33,11 +61,43 @@ encoding.}
 
 \item{sens_var_ref}{Reference class(es) of sensitive variable(s). Default is the
 default reference category in \code{sens_var}.}
+
+\item{x}{\code{seeBias} object}
+
+\item{y}{Not supported.}
+
+\item{...}{Not supported.}
+
+\item{object}{\code{summary.seeBias} object}
+
+\item{digits}{Number of digits to print for fairness metrics. Default is 3.}
+
+\item{metric_type}{Whether to quantify fairness as \code{"difference"} or
+\code{"ratio"}. To print both, specify \code{"all"}.}
 }
 \value{
+Returns a data.frame of performance metrics evaluated within each
+  sensitive group.
+
+Returns a data.frame of performance metrics evaluated within each
+  sensitive group.
+
 Returns a data.frame of performance metrics evaluated within each
   sensitive group.
 }
 \description{
 Evaluate algorithm fairness across patient subgroups based on predicted probabilities
 }
+\section{Functions}{
+\itemize{
+\item \code{evaluate_prediction_score()}: Evaluate algorithm fairness across patient subgroups based on predicted scores
+
+\item \code{evaluate_prediction_bin()}: Evaluate algorithm fairness across patient subgroups based on predicted labels
+
+\item \code{plot(seeBias)}: Plot fairness metrics
+
+\item \code{summary(seeBias)}: Plot model performance metrics for fairness evaluation
+
+\item \code{print(summary.seeBias)}: Summarise fairness metrics
+
+}}

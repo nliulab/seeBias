@@ -64,68 +64,53 @@ x_plots <- plot(x)
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
+``` r
+summary(x)
+```
+
+| Fairness metric              | African American | Hispanic |  Other |
+|:-----------------------------|-----------------:|---------:|-------:|
+| Equal opportunity difference |            0.274 |   -0.010 | -0.067 |
+| Equalised odds difference    |            0.274 |   -0.036 | -0.083 |
+| BER equality difference      |           -0.042 |   -0.013 | -0.008 |
+
+Equal opportunity ensures that different subgroups have the same True
+Positive Rate (TPR). This means that the model is equally good at
+correctly identifying positive cases across all groups. It is measured
+by comparing the TPR of each subgroup to that of a reference group,
+either through a ratio or a difference.
+
+Equalised odds ensures that different subgroups have the same True
+Positive Rate (TPR) and False Positive Rate (FPR). This means the model
+is equally accurate and equally prone to errors across all groups. It is
+assessed by separately comparing the TPR and FPR of each subgroup to
+those of a reference group, and then taking the larger disparity—whether
+it’s in the TPR or FPR—based on the ratio or difference.
+
+Balanced error rate (BER) equality ensures that the Balanced Error Rate
+(BER) is consistent across different subgroups. BER is calculated as the
+average of the False Positive Rate (FPR) and False Negative Rate (FNR,
+which is 1 minus the True Positive Rate \[TPR\]). This means the model’s
+overall error rate, considering both false positives and false
+negatives, is uniform across all groups. It is assessed by comparing the
+BER of each subgroup to that of a reference group, with disparities
+measured using either ratios or differences.
+
 ### Details on return values
 
 `seeBias` object:
 
 ``` r
 x$fairness_evaluation$df_prob
-##              group     p_obs p_obs_lower p_obs_upper    p_pred     ratio
-## 1  [Ref] Caucasian 0.3908702   0.3699987   0.4117417 0.3200190 1.0000000
-## 2 African American 0.5231496   0.5057670   0.5405322 0.5880315 1.8374892
-## 3         Hispanic 0.3713163   0.3292010   0.4134316 0.2888016 0.9024513
-## 4            Other 0.3558442   0.3078068   0.4038815 0.2337662 0.7304761
+## NULL
 x$fairness_evaluation$df_metrics
-##               group   metric       est     lower     upper     ratio
-## 1   [Ref] Caucasian Accuracy 0.6609605 0.6402771 0.6811944 1.0000000
-## 2   [Ref] Caucasian      PPV 0.5809807 0.5426735 0.6185746 1.0000000
-## 3   [Ref] Caucasian      NPV 0.6986014 0.6740783 0.7223058 1.0000000
-## 4   [Ref] Caucasian      TPR 0.4756691 0.4410603 0.5104529 1.0000000
-## 5   [Ref] Caucasian      FPR 0.2201405 0.1977233 0.2438495 1.0000000
-## 6  African American Accuracy 0.6737008 0.6570803 0.6900007 1.0192754
-## 7  African American      PPV 0.6673808 0.6454912 0.6887433 1.1487143
-## 8  African American      NPV 0.6827217 0.6567274 0.7078922 0.9772693
-## 9  African American      TPR 0.7501505 0.7285989 0.7708146 1.5770428
-## 10 African American      FPR 0.4101717 0.3852601 0.4354325 1.8632269
-## 11         Hispanic Accuracy 0.6856582 0.6433513 0.7257926 1.0373663
-## 12         Hispanic      PPV 0.5986395 0.5146707 0.6785490 1.0303948
-## 13         Hispanic      NPV 0.7209945 0.6717274 0.7666047 1.0320542
-## 14         Hispanic      TPR 0.4656085 0.3928890 0.5394236 0.9788495
-## 15         Hispanic      FPR 0.1843750 0.1434193 0.2312853 0.8375332
-## 16            Other Accuracy 0.7012987 0.6528568 0.7466136 1.0610296
-## 17            Other      PPV 0.6222222 0.5138260 0.7223355 1.0709861
-## 18            Other      NPV 0.7254237 0.6707004 0.7755549 1.0383943
-## 19            Other      TPR 0.4087591 0.3255922 0.4959586 0.8593350
-## 20            Other      FPR 0.1370968 0.0968474 0.1862773 0.6227694
+## NULL
 x$fairness_evaluation$df_auc
-##         auc     lower     upper            group
-## 1 0.7345038 0.6829754 0.7860321            Other
-## 2 0.7235610 0.7059863 0.7411358 African American
-## 3 0.6879125 0.6648976 0.7109275  [Ref] Caucasian
-## 4 0.6941220 0.6466635 0.7415805         Hispanic
+## NULL
 x$fairness_evaluation$df_calib
-## # A tibble: 36 × 7
-##    predicted_midpoint event_rate events total lower upper group           
-##                 <dbl>      <dbl>  <dbl> <int> <dbl> <dbl> <fct>           
-##  1               0.15      0.175     37   211 0.134 0.225 [Ref] Caucasian 
-##  2               0.25      0.239     99   415 0.205 0.276 [Ref] Caucasian 
-##  3               0.35      0.356    232   652 0.325 0.388 [Ref] Caucasian 
-##  4               0.45      0.443    128   289 0.394 0.493 [Ref] Caucasian 
-##  5               0.55      0.524    174   332 0.477 0.570 [Ref] Caucasian 
-##  6               0.65      0.732     71    97 0.647 0.803 [Ref] Caucasian 
-##  7               0.75      0.710     44    62 0.599 0.801 [Ref] Caucasian 
-##  8               0.85      0.786     22    28 0.617 0.898 [Ref] Caucasian 
-##  9               0.95      0.882     15    17 0.665 0.975 [Ref] Caucasian 
-## 10               0.15      0.203     13    64 0.127 0.306 African American
-## # ℹ 26 more rows
+## NULL
 head(x$fairness_evaluation$df_roc)
-##         fpr       tpr group
-## 1 0.9919355 1.0000000 Other
-## 2 0.9677419 0.9927007 Other
-## 3 0.8790323 0.9854015 Other
-## 4 0.8669355 0.9781022 Other
-## 5 0.8064516 0.9489051 Other
-## 6 0.7782258 0.9343066 Other
+## NULL
 ```
 
 Individual plots:
@@ -134,31 +119,31 @@ Individual plots:
 x_plots$metrics
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 x_plots$roc
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 x_plots$calibration_in_large
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
 
 ``` r
 x_plots$calibration
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
 
 ``` r
 x_plots$score
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->
 
 ### Multiple sensitive variables
 
@@ -180,31 +165,63 @@ x2 <- evaluate_prediction_prob(
 x_plots2 <- plot(x2, print_statistics = FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+``` r
+summary(x2)
+```
+
+| Fairness metric              | African American & Female | African American & Male | Caucasian & Female | Hispanic & Female | Hispanic & Male | Other & Female | Other & Male |
+|:-----------------------------|--------------------------:|------------------------:|-------------------:|------------------:|----------------:|---------------:|-------------:|
+| Equal opportunity difference |                     0.010 |                   0.242 |             -0.296 |            -0.306 |          -0.034 |         -0.323 |       -0.106 |
+| Equalised odds difference    |                    -0.026 |                   0.242 |             -0.296 |            -0.306 |          -0.047 |         -0.323 |       -0.106 |
+| BER equality difference      |                    -0.018 |                  -0.024 |              0.053 |             0.029 |          -0.006 |          0.028 |        0.005 |
+
+Equal opportunity ensures that different subgroups have the same True
+Positive Rate (TPR). This means that the model is equally good at
+correctly identifying positive cases across all groups. It is measured
+by comparing the TPR of each subgroup to that of a reference group,
+either through a ratio or a difference.
+
+Equalised odds ensures that different subgroups have the same True
+Positive Rate (TPR) and False Positive Rate (FPR). This means the model
+is equally accurate and equally prone to errors across all groups. It is
+assessed by separately comparing the TPR and FPR of each subgroup to
+those of a reference group, and then taking the larger disparity—whether
+it’s in the TPR or FPR—based on the ratio or difference.
+
+Balanced error rate (BER) equality ensures that the Balanced Error Rate
+(BER) is consistent across different subgroups. BER is calculated as the
+average of the False Positive Rate (FPR) and False Negative Rate (FNR,
+which is 1 minus the True Positive Rate \[TPR\]). This means the model’s
+overall error rate, considering both false positives and false
+negatives, is uniform across all groups. It is assessed by comparing the
+BER of each subgroup to that of a reference group, with disparities
+measured using either ratios or differences.
 
 ``` r
 x_plots2$roc
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 x_plots2$calibration_in_large
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
 ``` r
 x_plots2$calibration
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
 ``` r
 x_plots2$score
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
 ### Specify predicted scores
 
@@ -226,28 +243,60 @@ x3 <- evaluate_prediction_score(
 x_plots3 <- plot(x3, print_statistics = FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+summary(x3)
+```
+
+| Fairness metric              | African American & Female | African American & Male | Caucasian & Female | Hispanic & Female | Hispanic & Male | Other & Female | Other & Male |
+|:-----------------------------|--------------------------:|------------------------:|-------------------:|------------------:|----------------:|---------------:|-------------:|
+| Equal opportunity difference |                     0.010 |                   0.242 |             -0.296 |            -0.306 |          -0.034 |         -0.323 |       -0.106 |
+| Equalised odds difference    |                    -0.026 |                   0.242 |             -0.296 |            -0.306 |          -0.047 |         -0.323 |       -0.106 |
+| BER equality difference      |                    -0.018 |                  -0.024 |              0.053 |             0.029 |          -0.006 |          0.028 |        0.005 |
+
+Equal opportunity ensures that different subgroups have the same True
+Positive Rate (TPR). This means that the model is equally good at
+correctly identifying positive cases across all groups. It is measured
+by comparing the TPR of each subgroup to that of a reference group,
+either through a ratio or a difference.
+
+Equalised odds ensures that different subgroups have the same True
+Positive Rate (TPR) and False Positive Rate (FPR). This means the model
+is equally accurate and equally prone to errors across all groups. It is
+assessed by separately comparing the TPR and FPR of each subgroup to
+those of a reference group, and then taking the larger disparity—whether
+it’s in the TPR or FPR—based on the ratio or difference.
+
+Balanced error rate (BER) equality ensures that the Balanced Error Rate
+(BER) is consistent across different subgroups. BER is calculated as the
+average of the False Positive Rate (FPR) and False Negative Rate (FNR,
+which is 1 minus the True Positive Rate \[TPR\]). This means the model’s
+overall error rate, considering both false positives and false
+negatives, is uniform across all groups. It is assessed by comparing the
+BER of each subgroup to that of a reference group, with disparities
+measured using either ratios or differences.
 
 ``` r
 x_plots3$roc
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 x_plots3$calibration_in_large
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 ``` r
 x_plots3$calibration
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-3.png)<!-- -->
 
 ``` r
 x_plots3$score
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-4.png)<!-- -->

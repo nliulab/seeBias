@@ -7,7 +7,7 @@
 check_pred_prob(y_pred, y_pred_threshold, y_obs)
 }
 \arguments{
-\item{y_pred}{A numeric vector of predicted probabilities. Should not contain
+\item{y_pred}{A vector of predicted outcome labels. Should not contain
 missing value.}
 
 \item{y_pred_threshold}{Threshold for \code{y_pred}. Predict positive label
