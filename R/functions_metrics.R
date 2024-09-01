@@ -62,11 +62,12 @@ compute_ci_prop <- function(p, n, alpha = 0.05) {
 }
 #' Find best threshold for predicted score from ROC analysis
 #' @inheritParams eval_pred
+#' @param y_pred Predicted probabilities or scores.
 #' @return Returns the best threshold.
 #' @importFrom pROC roc coords
 find_y_pred_threshold <- function(y_pred, y_obs, y_pos) {
   y_neg <- setdiff(unique(y_obs), y_pos)
   m_roc <- pROC::roc(response = y_obs, predictor = y_pred,
-                     levels = c(y_neg, y_pos))
+                     levels = c(y_neg, y_pos), quiet = TRUE)
   as.numeric(pROC::coords(m_roc, "best", ret = c("threshold"), transpose = TRUE))
 }

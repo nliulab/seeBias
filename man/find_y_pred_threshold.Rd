@@ -7,6 +7,8 @@
 find_y_pred_threshold(y_pred, y_obs, y_pos)
 }
 \arguments{
+\item{y_pred}{Predicted probabilities or scores.}
+
 \item{y_obs}{Observed class label.}
 
 \item{y_pos}{Character representing positive class. Default is "1" for 0/1

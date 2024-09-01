@@ -5,6 +5,7 @@ seeBias: Fairness Evaluation and Visualisation
   - [Usage](#usage)
   - [Details on return values](#details-on-return-values)
   - [Multiple sensitive variables](#multiple-sensitive-variables)
+  - [Specify predicted scores](#specify-predicted-scores)
 
 ## Demo
 
@@ -48,36 +49,33 @@ table(compas$Two_yr_Recidivism, compas$Ethnicity)
 m <- glm(Two_yr_Recidivism ~ ., data = compas, family = "binomial")
 # Extracted predicted risk and observations from test data.
 # If not specified, the best threshold in ROC analysis is used.
-x <- evaluate_prediction(
+x <- evaluate_prediction_prob(
   y_pred = predict(m, newdata = compas, type = "response"), 
   y_obs = compas$Two_yr_Recidivism, y_pos = "1",
   sens_var = compas$Ethnicity, sens_var_ref = "Caucasian"
 )
-## Setting direction: controls < cases
-## Threshold=0.45 set by ROC analysis.
+## Threshold=0.455 set by ROC analysis.
+## Configuring sensitive variables ...
+##     4 subgroups based on sensitive variables ('sens_var'): African American, Caucasian, Hispanic, Other.
+##     Reference group: Caucasian.
+## Configuration completed.
 x_plots <- plot(x)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
-
-Compiled plot can be retrieved from:
-
-``` r
-x_plots$overall
-```
 
 ### Details on return values
 
 `seeBias` object:
 
 ``` r
-x$df_prob
+x$fairness_evaluation$df_prob
 ##              group     p_obs p_obs_lower p_obs_upper    p_pred     ratio
 ## 1  [Ref] Caucasian 0.3908702   0.3699987   0.4117417 0.3200190 1.0000000
 ## 2 African American 0.5231496   0.5057670   0.5405322 0.5880315 1.8374892
 ## 3         Hispanic 0.3713163   0.3292010   0.4134316 0.2888016 0.9024513
 ## 4            Other 0.3558442   0.3078068   0.4038815 0.2337662 0.7304761
-x$df_metrics
+x$fairness_evaluation$df_metrics
 ##               group   metric       est     lower     upper     ratio
 ## 1   [Ref] Caucasian Accuracy 0.6609605 0.6402771 0.6811944 1.0000000
 ## 2   [Ref] Caucasian      PPV 0.5809807 0.5426735 0.6185746 1.0000000
@@ -99,13 +97,13 @@ x$df_metrics
 ## 18            Other      NPV 0.7254237 0.6707004 0.7755549 1.0383943
 ## 19            Other      TPR 0.4087591 0.3255922 0.4959586 0.8593350
 ## 20            Other      FPR 0.1370968 0.0968474 0.1862773 0.6227694
-x$df_auc
+x$fairness_evaluation$df_auc
 ##         auc     lower     upper            group
 ## 1 0.7345038 0.6829754 0.7860321            Other
 ## 2 0.7235610 0.7059863 0.7411358 African American
 ## 3 0.6879125 0.6648976 0.7109275  [Ref] Caucasian
 ## 4 0.6941220 0.6466635 0.7415805         Hispanic
-x$df_calib
+x$fairness_evaluation$df_calib
 ## # A tibble: 36 × 7
 ##    predicted_midpoint event_rate events total lower upper group           
 ##                 <dbl>      <dbl>  <dbl> <int> <dbl> <dbl> <fct>           
@@ -120,7 +118,7 @@ x$df_calib
 ##  9               0.95      0.882     15    17 0.665 0.975 [Ref] Caucasian 
 ## 10               0.15      0.203     13    64 0.127 0.306 African American
 ## # ℹ 26 more rows
-head(x$df_roc)
+head(x$fairness_evaluation$df_roc)
 ##         fpr       tpr group
 ## 1 0.9919355 1.0000000 Other
 ## 2 0.9677419 0.9927007 Other
@@ -136,49 +134,120 @@ Individual plots:
 x_plots$metrics
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ``` r
 x_plots$roc
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 x_plots$calibration_in_large
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
 ``` r
 x_plots$calibration
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 ``` r
 x_plots$score
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
 
 ### Multiple sensitive variables
 
 ``` r
-x2 <- evaluate_prediction(
+x2 <- evaluate_prediction_prob(
   y_pred = predict(m, newdata = compas, type = "response"), 
   y_obs = compas$Two_yr_Recidivism, y_pos = "1",
   sens_var = cbind(as.character(compas$Ethnicity), as.character(compas$Sex)), 
   sens_var_ref = c("Caucasian", "Male")
 )
-## Setting direction: controls < cases
-## Threshold=0.45 set by ROC analysis.
-## Among all 8 combinations of the 2 sensitive variables ('sens_var'), 8
-## combinations are observed. The reference class is Caucasian & Male.
+## Threshold=0.455 set by ROC analysis.
+## Configuring sensitive variables ...
+##     8 subgroups based on sensitive variables ('sens_var'): African American & Female, Caucasian & Female, Hispanic & Female, Other & Female, African American & Male, Caucasian & Male, Hispanic & Male, Other & Male.
+##     Reference group: Caucasian & Male.
+## Configuration completed.
 ## Warning in qf(p = alpha/2, df1 = 2 * x, df2 = 2 * (n - x + 1)): NaNs produced
 ## Warning in qf(p = 1 - alpha/2, df1 = 2 * (x + 1), df2 = 2 * (n - x)): NaNs
 ## produced
-x_plots <- plot(x2, heights = c(2.5, 1, 1), print_statistics = FALSE)
+x_plots2 <- plot(x2, print_statistics = FALSE)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+``` r
+x_plots2$roc
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+``` r
+x_plots2$calibration_in_large
+```
+
+![](README_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+
+``` r
+x_plots2$calibration
+```
+
+![](README_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+
+``` r
+x_plots2$score
+```
+
+![](README_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+
+### Specify predicted scores
+
+``` r
+x3 <- evaluate_prediction_score(
+  y_pred = predict(m, newdata = compas), 
+  y_obs = compas$Two_yr_Recidivism, y_pos = "1",
+  sens_var = cbind(as.character(compas$Ethnicity), as.character(compas$Sex)), 
+  sens_var_ref = c("Caucasian", "Male")
+)
+## Threshold=-0.181 set by ROC analysis.
+## Configuring sensitive variables ...
+##     8 subgroups based on sensitive variables ('sens_var'): African American & Female, Caucasian & Female, Hispanic & Female, Other & Female, African American & Male, Caucasian & Male, Hispanic & Male, Other & Male.
+##     Reference group: Caucasian & Male.
+## Configuration completed.
+## Warning in qf(p = alpha/2, df1 = 2 * x, df2 = 2 * (n - x + 1)): NaNs produced
+## Warning in qf(p = 1 - alpha/2, df1 = 2 * (x + 1), df2 = 2 * (n - x)): NaNs
+## produced
+x_plots3 <- plot(x3, print_statistics = FALSE)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
+x_plots3$roc
+```
+
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
+x_plots3$calibration_in_large
+```
+
+![](README_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+
+``` r
+x_plots3$calibration
+```
+
+![](README_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
+
+``` r
+x_plots3$score
+```
+
+![](README_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->

@@ -58,7 +58,7 @@ scale_fill_branded <- function(primary = "blue", other = "red", direction = 1,
 #' @param type Type to return, either "color" or "fill".
 select_scale <- function(x, type = "color") {
   type <- match.arg(arg = type, choices = c("color", "fill"))
-  n_sens <- x$n_sens
+  n_sens <- x$input$n_sens
   if (n_sens > 6) {
     if (type == "color") scale_color_discrete else scale_fill_discrete
   } else {

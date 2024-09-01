@@ -10,6 +10,8 @@ configure_group(group, ref, ref_label = NULL)
 \item{group}{Original group variable.}
 
 \item{ref}{Reference class of sensitive variable.}
+
+\item{ref_label}{New label for the reference class, if not \code{NULL}.}
 }
 \description{
 Configure sensitive group

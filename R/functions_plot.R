@@ -14,11 +14,10 @@ common_theme_small <- function() {
 #' @inheritParams plot.seeBias
 #' @import ggplot2
 #' @importFrom rlang .data
-#' @importFrom stats relevel
 plot_metrics <- function(x) {
-  df_metrics <- x$df_metrics
+  df_metrics <- x$performance_evaluation$df_metrics
   f_scale_fill <- select_scale(x = x, type = "fill")
-  n_sens <- x$n_sens
+  n_sens <- x$input$n_sens
   w_sens <- 0.8 / n_sens
 
   df_metrics$y <- as.numeric(df_metrics$metric) -
@@ -69,20 +68,25 @@ plot_metrics <- function(x) {
 }
 #' Private function to plot ROC curves
 #' @inheritParams plot.seeBias
+#' @param print_statistics Whether to print calibration slope in the plot
+#'   legend.
 #' @import ggplot2
 #' @importFrom rlang .data
 plot_roc <- function(x, print_statistics) {
+  df_roc <- x$performance_evaluation$df_roc
+  df_auc <- x$performance_evaluation$df_auc
+  if (is.null(df_roc)) return(NULL)
+
   if (print_statistics) {
-    auc_text <- unlist(lapply(1:nrow(x$df_auc), function(i) {
-      sprintf("%s: %.3f (%.3f-%.3f)", x$df_auc$group[i], x$df_auc$auc[i],
-              x$df_auc$lower[i], x$df_auc$upper[i])
+    auc_text <- unlist(lapply(1:nrow(df_auc), function(i) {
+      sprintf("%s: %.3f (%.3f-%.3f)", df_auc$group[i], df_auc$auc[i],
+              df_auc$lower[i], df_auc$upper[i])
     }))
-    auc_text_labels <- auc_text[match(levels(x$df_auc$group), x$df_auc$group)]
+    auc_text_labels <- auc_text[match(levels(df_auc$group), df_auc$group)]
   } else {
-    auc_text_labels <- levels(x$df_auc$group)
+    auc_text_labels <- levels(df_auc$group)
   }
   # Rearrange in the order of sensitive groups:
-  df_roc <- x$df_roc
   # Use AUC text as labels for groups instead:
   df_roc$`AUC (95% CI)` <- factor(df_roc$group, levels = levels(df_roc$group),
                                   labels = auc_text_labels)
@@ -108,11 +112,12 @@ plot_roc <- function(x, print_statistics) {
 #' @inheritParams plot.seeBias
 #' @import ggplot2
 #' @importFrom rlang .data
-#' @importFrom stats relevel
 plot_calib_large <- function(x) {
-  df_prob <- x$df_prob
+  df_prob <- x$performance_evaluation$df_prob
+  if (is.null(df_prob)) return(NULL)
+
   f_scale_fill <- select_scale(x = x, type = "fill")
-  n_sens <- x$n_sens
+  n_sens <- x$input$n_sens
   w_sens <- 0.95
   df_prob$y <- n_sens + 1 - as.numeric(df_prob$group)
   ggplot(df_prob, aes(y = .data$y)) +
@@ -141,13 +146,14 @@ plot_calib_large <- function(x) {
           legend.key.height = unit(0.5, "line"))
 }
 #' Private function to plot calibration curves
-#' @inheritParams plot.seeBias
+#' @inheritParams plot_roc
 #' @import ggplot2
 #' @importFrom rlang .data
+#' @importFrom stats as.formula coef lm
 plot_calibration <- function(x, print_statistics) {
   f_scale_color <- select_scale(x = x, type = "color")
   f_fill_color <- select_scale(x = x, type = "fill")
-  df_calib <- x$df_calib
+  df_calib <- x$performance_evaluation$df_calib
   if (print_statistics) {
     calib_slope <- unlist(lapply(levels(df_calib$group), function(g) {
       m_g <- lm(as.formula("event_rate ~ predicted_midpoint"),
@@ -194,9 +200,9 @@ plot_calibration <- function(x, print_statistics) {
 #' @importFrom stats quantile
 plot_score <- function(x) {
   f_scale_color <- select_scale(x = x, type = "color")
-  df <- data.frame(y_pred = x$y_pred,
-                   Label = factor(x$y_obs, levels = c(1, 0)),
-                   Group = x$sens_var)
+  df <- data.frame(y_pred = x$input$data$y_pred,
+                   Label = factor(x$input$data$y_obs, levels = c(1, 0)),
+                   Group = x$input$data$sens_var)
   df$y_group <- interaction(df$Group, df$Label, sep = ", label=",
                             lex.order = TRUE)
   df$y_group <- factor(df$y_group, levels = rev(levels(df$y_group)))

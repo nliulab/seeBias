@@ -18,8 +18,9 @@ LazyData: true
 RoxygenNote: 7.2.3
 Imports: 
     pROC,
+    rlang,
     ggplot2,
     dplyr,
-    ggpubr,
     magrittr,
     probably
+Depends: R (>= 2.10)

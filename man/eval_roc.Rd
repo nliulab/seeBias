@@ -7,7 +7,7 @@
 eval_roc(y_pred, y_obs, sens_var)
 }
 \arguments{
-\item{y_pred}{Processed predicted probability.}
+\item{y_pred}{Processed predicted probability or score.}
 
 \item{y_obs}{Processed observed label.}
 
