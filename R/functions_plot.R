@@ -30,7 +30,7 @@ plot_metrics <- function(x) {
   df_ref$x_lower <- df_ref$est * mark_ratio
   df_ref$x_upper <- df_ref$est / mark_ratio
   df_ref$y <- as.numeric(df_ref$metric)
-  error_bar_w <- nrow(df_metrics) / (4 * 5) * 0.1
+  error_bar_w <- (4 * 5) * 0.1 / nrow(df_metrics)
   ggplot(df_metrics, aes(y = .data$y)) +
     coord_cartesian(xlim = c(0, 1), ylim = c(0.5, m + 0.5), expand = FALSE) +
     scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.2)) +
