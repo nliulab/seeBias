@@ -30,6 +30,7 @@ plot_metrics <- function(x) {
   df_ref$x_lower <- df_ref$est * mark_ratio
   df_ref$x_upper <- df_ref$est / mark_ratio
   df_ref$y <- as.numeric(df_ref$metric)
+  error_bar_w <- 1 / nrow(df_metrics) * 2
   ggplot(df_metrics, aes(y = .data$y)) +
     coord_cartesian(xlim = c(0, 1), ylim = c(0.5, m + 0.5), expand = FALSE) +
     scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.2)) +
@@ -53,7 +54,7 @@ plot_metrics <- function(x) {
     geom_tile(aes(x = .data$est / 2, width = .data$est, fill = .data$group),
               height = w_sens - 0.01, color = NA) +
     geom_errorbar(aes(x = .data$est, xmin = .data$lower, xmax = .data$upper),
-                  width = 0.05) +
+                  width = error_bar_w) +
     f_scale_fill() +
     theme(axis.ticks.y = element_blank(),
           axis.text = element_text(size = 12),
@@ -120,6 +121,7 @@ plot_calib_large <- function(x) {
   n_sens <- x$input$n_sens
   w_sens <- 0.95
   df_prob$y <- n_sens + 1 - as.numeric(df_prob$group)
+  error_bar_w <- 0.2 / 4 * nrow(df_prob)
   ggplot(df_prob, aes(y = .data$y)) +
     scale_x_continuous(expand = expansion(mult = c(0, 0.05))) +
     scale_y_continuous(breaks = NULL, labels = NULL) +
@@ -137,7 +139,7 @@ plot_calib_large <- function(x) {
               linewidth = 0.5) +
     geom_errorbar(aes(x = .data$p_obs, xmin = .data$p_obs_lower,
                       xmax = .data$p_obs_upper),
-                  width = 0.05) +
+                  width = error_bar_w) +
     f_scale_fill(name = "Group") +
     common_theme_small() +
     theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
