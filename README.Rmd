@@ -47,10 +47,10 @@ summary(x)
 `seeBias` object:
 
 ```{r}
-x$fairness_evaluation$df_prob
-x$fairness_evaluation$df_metrics
-x$fairness_evaluation$df_auc
-x$fairness_evaluation$df_calib
+x$performance_evaluation$df_prob
+x$performance_evaluation$df_metrics
+x$performance_evaluation$df_auc
+x$performance_evaluation$df_calib
 head(x$fairness_evaluation$df_roc)
 ```
 
@@ -65,6 +65,19 @@ x_plots$roc
 x_plots$calibration_in_large
 x_plots$calibration
 x_plots$score
+```
+
+User define color scheme:
+
+```{r}
+x_plots$metrics + ggsci::scale_fill_npg()
+```
+
+```{r, fig.width=4, fig.height=4}
+x_plots$roc + ggsci::scale_color_npg()
+x_plots$calibration_in_large + ggsci::scale_fill_npg()
+x_plots$calibration + ggsci::scale_color_npg()
+x_plots$score + ggsci::scale_color_npg()
 ```
 
 ### Multiple sensitive variables

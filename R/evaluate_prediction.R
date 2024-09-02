@@ -209,14 +209,8 @@ summary.seeBias <- function(object, ...) {
   df_equal_opp <- df_metrics %>%
     filter(.data$metric == "TPR", .data$group != levels(.data$group)[1]) %>%
     select(-metric)
-  df_equal_opp_ratio <- df_equal_opp %>% select(-difference) %>%
-    tidyr::pivot_wider(names_from = group, values_from = ratio)
-  df_equal_opp_diff <- df_equal_opp %>% select(-ratio) %>%
-    tidyr::pivot_wider(names_from = group, values_from = difference)
-  df_equal_opp_wide <- rbind(
-    cbind(`Fairness metric` = "Equal opportunity ratio", df_equal_opp_ratio),
-    cbind(`Fairness metric` = "Equal opportunity difference", df_equal_opp_diff)
-  )
+  names(df_equal_opp) <- c("Subgroup", "Equal opportunity ratio",
+                           "Equal opportunity difference")
   # Equalised odds
   df_equalised_odds <- df_metrics %>%
     filter(.data$metric %in% c("FPR", "TPR"),
@@ -224,35 +218,23 @@ summary.seeBias <- function(object, ...) {
     group_by(.data$group) %>%
     summarise(ratio = .data$ratio[which.max(abs(.data$difference))],
               difference = .data$difference[which.max(abs(.data$difference))])
-  df_equalised_odds_ratio <- df_equalised_odds %>% select(-difference) %>%
-    tidyr::pivot_wider(names_from = group, values_from = ratio)
-  df_equalised_odds_diff <- df_equalised_odds %>% select(-ratio) %>%
-    tidyr::pivot_wider(names_from = group, values_from = difference)
-  df_equalised_odds_wide <- rbind(
-    cbind(`Fairness metric` = "Equalised odds ratio", df_equalised_odds_ratio),
-    cbind(`Fairness metric` = "Equalised odds difference", df_equalised_odds_diff)
-  )
+  names(df_equalised_odds) <- c("Subgroup", "Equalised odds ratio",
+                                "Equalised odds difference")
   # Balanced error rate
   df_ber <- object$performance_evaluation$df_metrics %>%
     filter(.data$metric %in% c("FPR", "TPR")) %>%
     select(group, metric, est) %>%
     tidyr::pivot_wider(names_from = metric, values_from = est) %>%
     mutate(BER = (.data$FPR + 1 - .data$TPR) / 2,
-           ratio = .data$BER / .data$BER[which(.data$group == levels(.data$group)[1])],
-           difference = .data$BER - .data$BER[which(.data$group == levels(.data$group)[1])]) %>%
+           ratio = .data$BER /
+             .data$BER[which(.data$group == levels(.data$group)[1])],
+           difference = .data$BER -
+             .data$BER[which(.data$group == levels(.data$group)[1])]) %>%
     filter(.data$group != levels(.data$group)[1]) %>%
     select(group, ratio, difference)
-  df_ber_ratio <- df_ber %>% select(-difference) %>%
-    tidyr::pivot_wider(names_from = group, values_from = ratio)
-  df_ber_diff <- df_ber %>% select(-ratio) %>%
-    tidyr::pivot_wider(names_from = group, values_from = difference)
-  df_ber_wide <- rbind(
-    cbind(`Fairness metric` = "BER equality ratio", df_ber_ratio),
-    cbind(`Fairness metric` = "BER equality difference", df_ber_diff)
-  )
-  df_fairness <- as.data.frame(rbind(
-    df_equal_opp_wide, df_equalised_odds_wide, df_ber_wide
-  ))
+  names(df_ber) <- c("Subgroup", "BER equality ratio", "BER equality difference")
+  df_fairness <- merge(df_equal_opp, df_equalised_odds, by = "Subgroup")
+  df_fairness <- merge(df_fairness, df_ber, by = "Subgroup")
   ls_concept <- list(
     `Equal opportunity` = "Equal opportunity ensures that different subgroups have the same True Positive Rate (TPR). This means that the model is equally good at correctly identifying positive cases across all groups. It is measured by comparing the TPR of each subgroup to that of a reference group, either through a ratio or a difference.",
     `Equalised odds` = "Equalised odds ensures that different subgroups have the same True Positive Rate (TPR) and False Positive Rate (FPR). This means the model is equally accurate and equally prone to errors across all groups. It is assessed by separately comparing the TPR and FPR of each subgroup to those of a reference group, and then taking the larger disparity—whether it's in the TPR or FPR—based on the ratio or difference.",
@@ -280,12 +262,10 @@ print.summary.seeBias <- function(object, ..., digits = 3,
   metric_names <- c("Equal opportunity", "Equalised odds", "BER equality")
   df_fairness <- object$fairness_metrics
   if (metric_type == "difference") {
-    df_fairness <- df_fairness[which(df_fairness$`Fairness metric` %in%
-                                       paste(metric_names, "difference")), ]
+    df_fairness <- df_fairness[, c("Subgroup", paste(metric_names, "difference"))]
   }
   if (metric_type == "ratio") {
-    df_fairness <- df_fairness[which(df_fairness$`Fairness metric` %in%
-                                       paste(metric_names, "ratio")), ]
+    df_fairness <- df_fairness[, c("Subgroup", paste(metric_names, "ratio"))]
   }
   print(knitr::kable(df_fairness, digits = digits, row.names = FALSE))
   cat("\n")
