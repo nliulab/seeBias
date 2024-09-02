@@ -166,7 +166,7 @@ sens_var_to_df <- function(sens_var) {
   if (is.null(dim(sens_var))) {
     # A single sensitive variable, input should be a vector
     sens_var <- unlist(sens_var)
-    if (!is.character(sens_var) & !is.factor(sens_var)) {
+    if (!is.factor(sens_var)) {
       sens_var <- factor(as.character(sens_var))
     }
     sens_var_df <- data.frame(sens_var = sens_var, stringsAsFactors = TRUE)
@@ -174,7 +174,7 @@ sens_var_to_df <- function(sens_var) {
     # Multiple sensitive variables, input should be a matrix or data.frame
     sens_var_df <- as.data.frame(sens_var, stringsAsFactors = TRUE)
     for (i in 1:ncol(sens_var_df)) {
-      if (!is.character(sens_var_df[, i]) & !is.factor(sens_var_df[, i])) {
+      if (!is.factor(sens_var_df[, i])) {
         sens_var_df[, i] <- factor(as.character(sens_var_df[, i]))
       }
     }
@@ -248,6 +248,9 @@ check_sens_var <- function(sens_var, sens_var_ref) {
     length(sens_var_levels), toString(sens_var_levels), sens_var_ref
   ))
   message("Configuration completed.")
-  configure_group(group = sens_var_vec, ref = sens_var_ref,
-                  ref_label = paste("[Ref]", sens_var_ref))
+  list(
+    sens_var_ref = sens_var_ref,
+    sens_var = configure_group(group = sens_var_vec, ref = sens_var_ref,
+                               ref_label = paste("[Ref]", sens_var_ref))
+  )
 }

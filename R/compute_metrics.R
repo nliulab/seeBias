@@ -91,10 +91,49 @@ eval_calib <- function(y_pred, y_obs, sens_var) {
     df_calib <- data.frame(
       y_obs = as.numeric(y_obs[which(sens_var == sens_var_cat)] == "1"),
       y_pred = y_pred[which(sens_var == sens_var_cat)]
-    ) %>% probably::cal_plot_breaks(truth = y_obs, estimate = y_pred)
+    ) %>% probably::cal_plot_breaks(
+      truth = y_obs, estimate = y_pred, num_breaks = 10, include_ribbon = TRUE
+    )
     df_calib$data$group <- sens_var_cat
     df_calib$data
   }))
   df_calib$group <- configure_group(group = df_calib$group, ref = sens_var_ref)
   df_calib
+}
+#' Evaluate model performance at different thresholds by group
+#' @param y_pred Processed predicted probabilities or scores.
+#' @param y_obs Processed observed label.
+#' @param sens_var Sensitive variable.
+#' @importFrom tidyr pivot_wider
+eval_metrics_group <- function(y_pred, y_obs, sens_var) {
+  thresholds <- quantile(
+    x = y_pred,
+    probs = setdiff(seq(from = 0, to = 1, by = 0.1), c(0, 1))
+  )
+  y_pos <- "1"
+  sens_var_ref <- levels(sens_var)[1]
+  # Performance metrics
+  df_metrics <- do.call("rbind", lapply(thresholds, function(th) {
+    y_pred_bin <- factor(as.numeric(y_pred > th))
+    do.call("rbind", lapply(levels(sens_var), function(var) {
+      i <- which(sens_var == var)
+      p_obs <- mean(y_obs[i] == y_pos)
+      p_obs_ci <- compute_ci_prop(p = p_obs, n = length(i))
+      cbind(
+        group = var,
+        threshold = th,
+        eval_pred(y_pred_bin = y_pred_bin[i], y_obs = y_obs[i], y_pos = y_pos)
+        # The above includes accuracy, which is not needed. Will remove later
+      )
+    }))
+  }))
+  df_metrics$group <- configure_group(
+    group = df_metrics$group, ref = sens_var_ref
+  )
+  df_metrics <- df_metrics[which(df_metrics$metric != "Accuracy"), ]
+  rownames(df_metrics) <- NULL
+  tidyr::pivot_wider(
+    data = df_metrics[, setdiff(names(df_metrics), c("lower", "upper"))],
+    names_from = metric, values_from = est
+  )
 }

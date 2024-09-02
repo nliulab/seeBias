@@ -16,9 +16,13 @@ compute_ci_cp <- function(numerator, denominator, alpha = 0.05) {
   # calculating for "failures", not "success" as in original paper
   x <- denominator - numerator
   n <- denominator
-  f_ub <- qf(p = alpha / 2, df1 = 2 * x, df2 = 2 * (n - x + 1))
+  f_ub <- suppressWarnings(
+    qf(p = alpha / 2, df1 = 2 * x, df2 = 2 * (n - x + 1))
+  )
   ub <- 1 - (1 + (n - x + 1) / (x * f_ub)) ^ -1
-  f_lb <- qf(p = 1 - alpha / 2, df1 = 2 * (x + 1), df2 = 2 * (n - x))
+  f_lb <- suppressWarnings(
+    qf(p = 1 - alpha / 2, df1 = 2 * (x + 1), df2 = 2 * (n - x))
+  )
   lb <- 1 - (1 + (n - x) / ((x + 1) * f_lb)) ^ -1
   if (numerator == denominator & is.na(ub)) ub <- 1
   if (numerator == 0 & is.na(lb)) lb <- 0

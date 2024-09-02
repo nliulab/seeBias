@@ -30,7 +30,7 @@ plot_metrics <- function(x) {
   df_ref$x_lower <- df_ref$est * mark_ratio
   df_ref$x_upper <- df_ref$est / mark_ratio
   df_ref$y <- as.numeric(df_ref$metric)
-  error_bar_w <- 1 / nrow(df_metrics) * 2
+  error_bar_w <- nrow(df_metrics) / (4 * 5) * 0.1
   ggplot(df_metrics, aes(y = .data$y)) +
     coord_cartesian(xlim = c(0, 1), ylim = c(0.5, m + 0.5), expand = FALSE) +
     scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.2)) +
@@ -94,11 +94,11 @@ plot_roc <- function(x, print_statistics) {
   f_scale_color <- select_scale(x = x, type = "color")
   ggplot(df_roc,
          aes(x = .data$fpr, y = .data$tpr, color = .data$`AUC (95% CI)`)) +
-    geom_line(linewidth = 1.2) +
+    geom_line(linewidth = 1) +
     geom_abline(slope = 1, intercept = 0, lty = 2, lwd = 0.3) +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 1)) +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1)) +
-    labs(x = "1-Specificity", y = "Sensitivity", subtitle = "",
+    labs(x = "1-Specificity", y = "Sensitivity",
          title = "Receiver operating characteristic curve") +
     f_scale_color() +
     theme_bw() +
@@ -195,7 +195,7 @@ plot_calibration <- function(x, print_statistics) {
           legend.position = c(1, 0),
           legend.key.width = unit(1, "line"))
 }
-#' Private function to plot score distributions by label and subgroup
+#' Private function to plot score distributions by label and group
 #' @inheritParams plot.seeBias
 #' @import ggplot2
 #' @importFrom rlang .data
@@ -220,16 +220,65 @@ plot_score <- function(x) {
     # annotate(geom = "text", x = x$y_pred_threshold, y = n_y_group + 1.5,
     #          label = "Threshold") +
     coord_cartesian(ylim = c(1, n_y_group), clip = "off") +
-    labs(x = "Predicted pobability/score", y = "", subtitle = "",
+    labs(x = "Predicted pobability/score", y = "",
          title = "Distribution of predicted probability/score") +
     f_scale_color() +
     theme_bw() +
-    common_theme_small() +
-    theme(legend.position = "bottom", legend.box.spacing = unit(0, "lines"),
+    theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+          plot.subtitle = element_text(size = 11),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 12),
+          strip.text.x = element_text(size = 12),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          plot.margin = margin(t = 0, r = 15, b = 2, l = 2, unit = "pt"),
+          legend.position = "bottom", legend.box.spacing = unit(0, "lines"),
           legend.box = "vertical", legend.spacing = unit(0, "lines"),
           legend.key.height = unit(0.5, "line"),
           legend.key.width = unit(0.8, "line"),
           axis.text.y = element_blank(), axis.ticks.y = element_blank(),
           panel.spacing = unit(0, "cm"),
           panel.border = element_rect(fill = NA, colour = "black", linewidth = 0.5))
+}
+#' Private function to plot numbers needed by group
+#' @inheritParams plot.seeBias
+#' @import ggplot2
+#' @importFrom rlang .data
+plot_metrics_group <- function(x) {
+  df_metrics_group <- x$performance_evaluation$df_metrics_group
+  if (is.null(df_metrics_group)) return(NULL)
+  f_scale_color <- select_scale(x = x, type = "color")
+  common_theme <- theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 11),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12),
+    strip.text.x = element_text(size = 12),
+    panel.border = element_rect(fill = NA, colour = "black", linewidth = 1),
+    plot.margin = margin(t = 0, r = 15, b = 2, l = 2, unit = "pt"),
+    legend.position = "bottom", legend.title = element_blank()
+  )
+  # PPV Plot
+  p_ppv <- ggplot(df_metrics_group,
+                  aes(x = .data$threshold, y = 1 / .data$PPV, color = .data$group)) +
+    geom_line(linewidth = 1) +
+    geom_point() +
+    labs(title = "Numbers needed for true positive",
+         x = "Threshold",
+         y = "Number of positive predictions needed") +
+    f_scale_color() +
+    theme_bw() +
+    common_theme
+  # NPV Plot
+  p_npv <- ggplot(df_metrics_group,
+                  aes(x = .data$threshold, y = 1 / .data$NPV, color = .data$group)) +
+    geom_line(linewidth = 1) +
+    geom_point() +
+    labs(title = "Numbers needed for true negative",
+         x = "Threshold",
+         y = "Number of negative predictions needed") +
+    f_scale_color() +
+    theme_bw() +
+    common_theme
+  list(p_ppv = p_ppv, p_npv = p_npv)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions_plot.R
 \name{plot_score}
 \alias{plot_score}
-\title{Private function to plot score distributions by label and subgroup}
+\title{Private function to plot score distributions by label and group}
 \usage{
 plot_score(x)
 }
@@ -10,5 +10,5 @@ plot_score(x)
 \item{x}{\code{seeBias} object}
 }
 \description{
-Private function to plot score distributions by label and subgroup
+Private function to plot score distributions by label and group
 }

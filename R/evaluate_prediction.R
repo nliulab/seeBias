@@ -25,7 +25,9 @@ evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
     y_pred = y_pred, y_pred_threshold = y_pred_threshold, y_obs = y_obs
   )
   # Process sensitive variable
-  sens_var <- check_sens_var(sens_var = sens_var, sens_var_ref = sens_var_ref)
+  input_sens_var <- check_sens_var(sens_var = sens_var, sens_var_ref = sens_var_ref)
+  sens_var <- input_sens_var$sens_var
+  sens_var_ref <- input_sens_var$sens_var_ref
   if (length(sens_var) != length(y_obs)) {
     stop(simpleError("The length (or number of rows) of sensitive variables ('sens_var') must be the same as the length of observed label ('y_obs')."))
   }
@@ -33,6 +35,10 @@ evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
   # Metrics:
   res_metrics <- eval_metrics_based(
     y_pred_bin = input_pred$y_pred_bin, y_obs = y_obs, sens_var = sens_var
+  )
+  # Metrics by group:
+  df_metrics_group <- eval_metrics_group(
+    y_pred = input_pred$y_pred, y_obs = y_obs, sens_var = sens_var
   )
   # ROC and AUC:
   ls_roc <- eval_roc(
@@ -55,11 +61,13 @@ evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
         sens_var = sens_var
       ),
       y_pred_threshold = input_pred$y_pred_threshold,
+      sens_var_ref = sens_var_ref,
       n_sens = length(levels(sens_var))
     ),
     performance_evaluation = list(
       df_metrics = res_metrics$df_metrics,
       df_prob = res_metrics$df_prob,
+      df_metrics_group = df_metrics_group,
       df_roc = df_roc, df_auc = df_auc,
       df_calib = df_calib
     )
@@ -84,7 +92,9 @@ evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
     y_pred = y_pred, y_pred_threshold = y_pred_threshold, y_obs = y_obs
   )
   # Process sensitive variable
-  sens_var <- check_sens_var(sens_var = sens_var, sens_var_ref = sens_var_ref)
+  input_sens_var <- check_sens_var(sens_var = sens_var, sens_var_ref = sens_var_ref)
+  sens_var <- input_sens_var$sens_var
+  sens_var_ref <- input_sens_var$sens_var_ref
   if (length(sens_var) != length(y_obs)) {
     stop(simpleError("The length (or number of rows) of sensitive variables ('sens_var') must be the same as the length of observed label ('y_obs')."))
   }
@@ -92,6 +102,10 @@ evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
   # Metrics:
   res_metrics <- eval_metrics_based(
     y_pred_bin = input_pred$y_pred_bin, y_obs = y_obs, sens_var = sens_var
+  )
+  # Metrics by group:
+  df_metrics_group <- eval_metrics_group(
+    y_pred = input_pred$y_pred, y_obs = y_obs, sens_var = sens_var
   )
   # ROC and AUC:
   ls_roc <- eval_roc(
@@ -114,11 +128,13 @@ evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
         sens_var = sens_var
       ),
       y_pred_threshold = input_pred$y_pred_threshold,
+      sens_var_ref = sens_var_ref,
       n_sens = length(levels(sens_var))
     ),
     performance_evaluation = list(
       df_metrics = res_metrics$df_metrics,
       df_prob = res_metrics$df_prob,
+      df_metrics_group = df_metrics_group,
       df_roc = df_roc, df_auc = df_auc,
       df_calib = df_calib
     )
@@ -142,7 +158,9 @@ evaluate_prediction_bin <- function(y_pred, y_obs, y_pos = "1",
     y_pred = y_pred, y_pos = y_pos, y_obs = y_obs
   )
   # Process sensitive variable
-  sens_var <- check_sens_var(sens_var = sens_var, sens_var_ref = sens_var_ref)
+  input_sens_var <- check_sens_var(sens_var = sens_var, sens_var_ref = sens_var_ref)
+  sens_var <- input_sens_var$sens_var
+  sens_var_ref <- input_sens_var$sens_var_ref
   if (length(sens_var) != length(y_obs)) {
     stop(simpleError("The length (or number of rows) of sensitive variables ('sens_var') must be the same as the length of observed label ('y_obs')."))
   }
@@ -162,11 +180,13 @@ evaluate_prediction_bin <- function(y_pred, y_obs, y_pos = "1",
         sens_var = sens_var
       ),
       y_pred_threshold = NULL,
+      sens_var_ref = sens_var_ref,
       n_sens = length(levels(sens_var))
     ),
     performance_evaluation = list(
       df_metrics = res_metrics$df_metrics,
       df_prob = res_metrics$df_prob,
+      df_metrics_group = NULL,
       df_roc = NULL, df_auc = NULL,
       df_calib = NULL
     )
@@ -182,14 +202,23 @@ evaluate_prediction_bin <- function(y_pred, y_obs, y_pos = "1",
 #' @export
 plot.seeBias <- function(x, print_statistics = TRUE, y = NULL, ...) {
   p_metrics <- plot_metrics(x = x)
+  ls_metrics_group <- plot_metrics_group(x = x)
+  p_ppv <- ls_metrics_group$p_ppv
+  p_npv <- ls_metrics_group$p_npv
   p_roc <- plot_roc(x = x, print_statistics = print_statistics)
   p_calib <- plot_calibration(x = x, print_statistics = print_statistics)
   p_calib_large <- plot_calib_large(x = x)
   p_score <- plot_score(x = x)
   plot(p_metrics)
-  invisible(list(metrics = p_metrics, roc = p_roc,
-                 calibration_in_large = p_calib_large, calibration = p_calib,
-                 score = p_score))
+  invisible(list(
+    `Performance metrics` = p_metrics,
+    `ROC curves` = p_roc,
+    `Calibration in the large` = p_calib_large,
+    `Calibration curves` = p_calib,
+    `Boxplot of predictions` = p_score,
+    `Numbers needed for true positive` = p_ppv,
+    `Numbers needed for true negative` = p_npv
+  ))
 }
 #' @describeIn evaluate_prediction_prob
 #' Plot model performance metrics for fairness evaluation
@@ -209,7 +238,7 @@ summary.seeBias <- function(object, ...) {
   df_equal_opp <- df_metrics %>%
     filter(.data$metric == "TPR", .data$group != levels(.data$group)[1]) %>%
     select(-metric)
-  names(df_equal_opp) <- c("Subgroup", "Equal opportunity ratio",
+  names(df_equal_opp) <- c("Group", "Equal opportunity ratio",
                            "Equal opportunity difference")
   # Equalised odds
   df_equalised_odds <- df_metrics %>%
@@ -218,7 +247,7 @@ summary.seeBias <- function(object, ...) {
     group_by(.data$group) %>%
     summarise(ratio = .data$ratio[which.max(abs(.data$difference))],
               difference = .data$difference[which.max(abs(.data$difference))])
-  names(df_equalised_odds) <- c("Subgroup", "Equalised odds ratio",
+  names(df_equalised_odds) <- c("Group", "Equalised odds ratio",
                                 "Equalised odds difference")
   # Balanced error rate
   df_ber <- object$performance_evaluation$df_metrics %>%
@@ -232,16 +261,20 @@ summary.seeBias <- function(object, ...) {
              .data$BER[which(.data$group == levels(.data$group)[1])]) %>%
     filter(.data$group != levels(.data$group)[1]) %>%
     select(group, ratio, difference)
-  names(df_ber) <- c("Subgroup", "BER equality ratio", "BER equality difference")
-  df_fairness <- merge(df_equal_opp, df_equalised_odds, by = "Subgroup")
-  df_fairness <- merge(df_fairness, df_ber, by = "Subgroup")
-  ls_concept <- list(
-    `Equal opportunity` = "Equal opportunity ensures that different subgroups have the same True Positive Rate (TPR). This means that the model is equally good at correctly identifying positive cases across all groups. It is measured by comparing the TPR of each subgroup to that of a reference group, either through a ratio or a difference.",
-    `Equalised odds` = "Equalised odds ensures that different subgroups have the same True Positive Rate (TPR) and False Positive Rate (FPR). This means the model is equally accurate and equally prone to errors across all groups. It is assessed by separately comparing the TPR and FPR of each subgroup to those of a reference group, and then taking the larger disparity—whether it's in the TPR or FPR—based on the ratio or difference.",
-    `BER equality` = "Balanced error rate (BER) equality ensures that the Balanced Error Rate (BER) is consistent across different subgroups. BER is calculated as the average of the False Positive Rate (FPR) and False Negative Rate (FNR, which is 1 minus the True Positive Rate [TPR]). This means the model's overall error rate, considering both false positives and false negatives, is uniform across all groups. It is assessed by comparing the BER of each subgroup to that of a reference group, with disparities measured using either ratios or differences."
+  names(df_ber) <- c("Group", "BER equality ratio", "BER equality difference")
+  df_fairness <- merge(df_equal_opp, df_equalised_odds, by = "Group")
+  df_fairness <- merge(df_fairness, df_ber, by = "Group")
+  vec_concept <- list(
+    `Equal opportunity ratio` = "Equal opportunity ensures that different groups have the same true positive rate (TPR), meaning the model correctly identifies positive cases equally well across all groups. We assess this by first calculating the ratio of TPR to a reference group for each group, and then comparing these ratios across groups. Ratios close to 1 indicate minimal bias.",
+    `Equal opportunity difference` = "Equal opportunity ensures that different groups have the same true positive rate (TPR), meaning the model correctly identifies positive cases equally well across all groups. We assess this by first calculating the difference in TPR between each group and a reference group, then comparing these differences across groups. Differences close to 0 indicate minimal bias.",
+    `Equalised odds ratio` = "Equalised odds ensure that different groups have the same true positive rate (TPR) and false positive rate (FPR), meaning the model is equally accurate and equally prone to errors across all groups. We assess this by first calculating the ratio of each group’s TPR and FPR to those of a reference group, focusing on the larger disparity—whether in TPR or FPR—and then comparing these ratios across groups. Ratios close to 1 indicate minimal bias.",
+    `Equalised odds difference` = "Equalised odds ensure that different groups have the same true positive rate (TPR) and false positive rate (FPR), meaning the model is equally accurate and equally prone to errors across all groups. We assess this by first calculating the differences in each group’s TPR and FPR compared to those of a reference group, focusing on the larger disparity—whether in TPR or FPR—and then comparing these differences across groups. Differences close to 0 indicate minimal bias.",
+    `BER equality ratio` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate [TPR]). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. We assess this by first calculating the ratio of BER to a reference group for each group, and then comparing these ratios across groups. Ratios close to 1 indicate minimal bias.",
+    `BER equality difference` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate [TPR]). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. We assess this by first calculating the difference in each group's BER compared to that of a reference group, and then comparing these differences across groups. Differences close to 0 indicate minimal bias."
   )
   obj_summ <- list(fairness_metrics = df_fairness,
-                   fairness_metrics_concept = ls_concept)
+                   fairness_metrics_concept = vec_concept,
+                   sens_var_ref = object$input$sens_var_ref)
   class(obj_summ) <- "summary.seeBias"
   print.summary.seeBias(obj_summ)
   invisible(obj_summ)
@@ -259,15 +292,22 @@ print.summary.seeBias <- function(object, ..., digits = 3,
                                   metric_type = "difference") {
   metric_type <- match.arg(arg = tolower(metric_type),
                            choices = c("difference", "ratio", "all"))
-  metric_names <- c("Equal opportunity", "Equalised odds", "BER equality")
   df_fairness <- object$fairness_metrics
+  metric_names <- c("Equal opportunity", "Equalised odds", "BER equality")
+  names_diff <- paste(metric_names, "difference")
+  names_ratio <- paste(metric_names, "ratio")
   if (metric_type == "difference") {
-    df_fairness <- df_fairness[, c("Subgroup", paste(metric_names, "difference"))]
-  }
-  if (metric_type == "ratio") {
-    df_fairness <- df_fairness[, c("Subgroup", paste(metric_names, "ratio"))]
+    df_fairness <- df_fairness[, c("Group", names_diff)]
+    vec_concept <- object$fairness_metrics_concept[names_diff]
+  } else if (metric_type == "ratio") {
+    df_fairness <- df_fairness[, c("Group", names_ratio)]
+    vec_concept <- object$fairness_metrics_concept[names_ratio]
+  } else {
+    df_fairness <- df_fairness
+    vec_concept <- object$fairness_metrics_concept
   }
   print(knitr::kable(df_fairness, digits = digits, row.names = FALSE))
   cat("\n")
-  for (l in object$fairness_metrics_concept) cat(l, "\n\n")
+  cat("The reference group is", object$sens_var_ref, "\n\n")
+  for (v in vec_concept) cat(v, "\n\n")
 }

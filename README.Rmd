@@ -12,116 +12,58 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE,
 
 ## Demo
 
-### Usage
+Use subset of COMPAS data for Caucasian and African American.
 
 ```{r}
+library(dplyr)
 library(seeBias)
 # Load example data
 data("compas")
 head(compas)
 table(compas$Two_yr_Recidivism, compas$Ethnicity)
-# Not sensible to analyse Asian and Native American as separate categories due
-# to insufficient observations. Combine into Other.
-compas$Ethnicity <- ifelse(compas$Ethnicity %in% c("Asian", "Native_American"),
-                           "Other", as.character(compas$Ethnicity))
+compas <- compas %>% filter(Ethnicity %in% c("Caucasian", "African_American"))
 compas$Ethnicity <- ifelse(compas$Ethnicity == "African_American",
                            "African American", as.character(compas$Ethnicity))
-table(compas$Two_yr_Recidivism, compas$Ethnicity)
 m <- glm(Two_yr_Recidivism ~ ., data = compas, family = "binomial")
+```
+
+### Fairness metrics
+
+Use race and gender as sensitive variables.
+
+```{r}
 # Extracted predicted risk and observations from test data.
 # If not specified, the best threshold in ROC analysis is used.
-x <- evaluate_prediction_prob(
+x <- compas %>% select(Ethnicity, Sex) %>% evaluate_prediction_prob(
   y_pred = predict(m, newdata = compas, type = "response"), 
   y_obs = compas$Two_yr_Recidivism, y_pos = "1",
-  sens_var = compas$Ethnicity, sens_var_ref = "Caucasian"
+  sens_var = ., sens_var_ref = c("Caucasian", "Male")
 )
-x_plots <- plot(x)
 ```
+
+Quantify fairness (<font color="red">Table heading and metric definitions to be finalised</font>):
 
 ```{r results='asis'}
 summary(x)
 ```
 
-### Details on return values
-
-`seeBias` object:
+### Visualisation of fairness metrics
 
 ```{r}
-x$performance_evaluation$df_prob
-x$performance_evaluation$df_metrics
-x$performance_evaluation$df_auc
-x$performance_evaluation$df_calib
-head(x$fairness_evaluation$df_roc)
+x_plots <- plot(x)
 ```
 
-Individual plots:
+Alternative color scheme:
 
 ```{r}
-x_plots$metrics
+x_plots$`Performance metrics` + ggsci::scale_fill_npg()
 ```
 
 ```{r, fig.width=4, fig.height=4}
-x_plots$roc
-x_plots$calibration_in_large
-x_plots$calibration
-x_plots$score
-```
-
-User define color scheme:
-
-```{r}
-x_plots$metrics + ggsci::scale_fill_npg()
-```
-
-```{r, fig.width=4, fig.height=4}
-x_plots$roc + ggsci::scale_color_npg()
-x_plots$calibration_in_large + ggsci::scale_fill_npg()
-x_plots$calibration + ggsci::scale_color_npg()
-x_plots$score + ggsci::scale_color_npg()
-```
-
-### Multiple sensitive variables
-
-```{r}
-x2 <- evaluate_prediction_prob(
-  y_pred = predict(m, newdata = compas, type = "response"), 
-  y_obs = compas$Two_yr_Recidivism, y_pos = "1",
-  sens_var = cbind(as.character(compas$Ethnicity), as.character(compas$Sex)), 
-  sens_var_ref = c("Caucasian", "Male")
-)
-x_plots2 <- plot(x2, print_statistics = FALSE)
-```
-
-```{r results='asis'}
-summary(x2)
-```
-
-```{r, fig.width=4, fig.height=4}
-x_plots2$roc
-x_plots2$calibration_in_large
-x_plots2$calibration
-x_plots2$score
-```
-
-### Specify predicted scores
-
-```{r}
-x3 <- evaluate_prediction_score(
-  y_pred = predict(m, newdata = compas), 
-  y_obs = compas$Two_yr_Recidivism, y_pos = "1",
-  sens_var = cbind(as.character(compas$Ethnicity), as.character(compas$Sex)), 
-  sens_var_ref = c("Caucasian", "Male")
-)
-x_plots3 <- plot(x3, print_statistics = FALSE)
-```
-
-```{r results='asis'}
-summary(x3)
-```
-
-```{r, fig.width=4, fig.height=4}
-x_plots3$roc
-x_plots3$calibration_in_large
-x_plots3$calibration
-x_plots3$score
+x_plots$`ROC curves` + ggsci::scale_color_npg()
+x_plots$`Calibration in the large` + ggsci::scale_fill_npg()
+x_plots$`Calibration curves` + ggsci::scale_color_npg()
+x_plots$`Boxplot of predictions` + ggsci::scale_color_npg()
+x_plots$`Numbers needed for true positive` + ggsci::scale_color_npg()
+x_plots$`Numbers needed for true negative` + ggsci::scale_color_npg()
 ```
