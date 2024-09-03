@@ -216,6 +216,7 @@ plot_score <- function(x) {
                             lex.order = TRUE)
   df$y_group <- factor(df$y_group, levels = rev(levels(df$y_group)))
   n_y_group <- length(unique(df$y_group))
+
   ggplot(data = df,
          aes(y = .data$y_group, x = .data$y_pred, color = .data$Group,
              lty = .data$Label)) +
@@ -224,28 +225,21 @@ plot_score <- function(x) {
     scale_x_continuous(sec.axis = dup_axis(
       name = "", breaks = x$y_pred_threshold, labels = "Threshold"
     )) +
-    # annotate(geom = "text", x = x$y_pred_threshold, y = n_y_group + 1.5,
-    #          label = "Threshold") +
     coord_cartesian(ylim = c(1, n_y_group), clip = "off") +
-    labs(x = "Predicted pobability/score", y = "",
+    labs(x = "Predicted probability/score", y = "",
          title = "Distribution of predicted probability/score") +
     f_scale_color() +
     theme_bw() +
-    theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-          plot.subtitle = element_text(size = 11),
-          axis.text = element_text(size = 12),
-          axis.title = element_text(size = 12),
-          strip.text.x = element_text(size = 12),
-          panel.grid.major.x = element_blank(),
-          panel.grid.minor.x = element_blank(),
-          plot.margin = margin(t = 0, r = 15, b = 2, l = 2, unit = "pt"),
-          legend.position = "bottom", legend.box.spacing = unit(0, "lines"),
-          legend.box = "vertical", legend.spacing = unit(0, "lines"),
-          legend.key.height = unit(0.5, "line"),
+    common_theme_small() +
+    theme(legend.position = "bottom",
+          legend.box = "horizontal",
           legend.key.width = unit(0.8, "line"),
-          axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+          legend.key.height = unit(0.5, "line"),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
           panel.spacing = unit(0, "cm"),
-          panel.border = element_rect(fill = NA, colour = "black", linewidth = 0.5))
+          panel.border = element_rect(fill = NA, colour = "black", linewidth = 0.5)) +
+    guides(color = guide_legend(ncol = 2), linetype = "none")
 }
 
 #' Private function to plot numbers needed by group
