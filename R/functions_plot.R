@@ -58,15 +58,13 @@ plot_metrics <- function(x) {
     theme(axis.ticks.y = element_blank(),
           axis.text = element_text(size = 12),
           axis.title = element_text(size = 12),
-          legend.position = "bottom",
-          legend.box = "horizontal",
+          legend.position = "none",
           plot.title = element_text(size = 14, face = "bold"),
           plot.subtitle = element_text(size = 11),
           panel.border = element_rect(fill = NA, colour = "black", size = 1),
           panel.grid.major.y = element_blank(),
           panel.grid.minor.y = element_blank(),
-          plot.margin = margin(t = 0, r = 2, b = 0, l = 0, unit = "pt")) +
-    guides(fill = guide_legend(ncol = 2))
+          plot.margin = margin(t = 0, r = 2, b = 0, l = 0, unit = "pt"))
 }
 
 #' Private function to plot ROC curves
@@ -107,10 +105,10 @@ plot_roc <- function(x, print_statistics) {
     theme_bw() +
     common_theme_small() +
     theme(legend.background = element_rect(fill = NA),
-          legend.position = "bottom",
-          legend.box = "horizontal",
+          legend.position = "right",
+          legend.box = "vertical",
           legend.key.width = unit(1, "line")) +
-    guides(color = guide_legend(ncol = 2))
+    guides(color = guide_legend(ncol = 1))
 }
 
 #' Private function to plot calibration in the large
@@ -146,11 +144,11 @@ plot_calib_large <- function(x) {
     f_scale_fill(name = "Group") +
     common_theme_small() +
     theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
-          legend.position = "bottom",
-          legend.box = "horizontal",
+          legend.position = "right",
+          legend.box = "vertical",
           legend.key.width = unit(0.5, "line"),
           legend.key.height = unit(0.5, "line")) +
-    guides(fill = guide_legend(ncol = 2))
+    guides(fill = guide_legend(ncol = 1))
 }
 
 #' Private function to plot calibration curves
@@ -196,10 +194,10 @@ plot_calibration <- function(x, print_statistics) {
     theme_bw() +
     common_theme_small() +
     theme(legend.background = element_rect(fill = NA),
-          legend.position = "bottom",
-          legend.box = "horizontal",
+          legend.position = "right",
+          legend.box = "vertical",
           legend.key.width = unit(1, "line")) +
-    guides(color = guide_legend(ncol = 2))
+    guides(color = guide_legend(ncol = 1))
 }
 
 #' Private function to plot score distributions by label and group
@@ -231,15 +229,15 @@ plot_score <- function(x) {
     f_scale_color() +
     theme_bw() +
     common_theme_small() +
-    theme(legend.position = "bottom",
-          legend.box = "horizontal",
+    theme(legend.position = "right",
+          legend.box = "vertical",
           legend.key.width = unit(0.8, "line"),
           legend.key.height = unit(0.5, "line"),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
           panel.spacing = unit(0, "cm"),
           panel.border = element_rect(fill = NA, colour = "black", linewidth = 0.5)) +
-    guides(color = guide_legend(ncol = 2), linetype = "none")
+    guides(color = guide_legend(ncol = 1), linetype = "none")
 }
 
 #' Private function to plot numbers needed by group
@@ -258,8 +256,8 @@ plot_metrics_group <- function(x) {
     strip.text.x = element_text(size = 12),
     panel.border = element_rect(fill = NA, colour = "black", linewidth = 1),
     plot.margin = margin(t = 0, r = 15, b = 2, l = 2, unit = "pt"),
-    legend.position = "bottom",
-    legend.box = "horizontal",
+    legend.position = "right",
+    legend.box = "vertical",
     legend.title = element_blank()
   )
 
@@ -274,7 +272,7 @@ plot_metrics_group <- function(x) {
     f_scale_color() +
     theme_bw() +
     common_theme +
-    guides(color = guide_legend(ncol = 2))
+    guides(color = guide_legend(ncol = 1))
 
   # NPV Plot
   p_npv <- ggplot(df_metrics_group,
@@ -287,7 +285,7 @@ plot_metrics_group <- function(x) {
     f_scale_color() +
     theme_bw() +
     common_theme +
-    guides(color = guide_legend(ncol = 2))
+    guides(color = guide_legend(ncol = 1))
 
   list(p_ppv = p_ppv, p_npv = p_npv)
 }

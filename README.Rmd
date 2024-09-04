@@ -59,7 +59,7 @@ Alternative color scheme:
 x_plots$`Performance metrics` + ggsci::scale_fill_npg()
 ```
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=7, fig.height=4}
 x_plots$`ROC curves` + ggsci::scale_color_npg()
 x_plots$`Calibration in the large` + ggsci::scale_fill_npg()
 x_plots$`Calibration curves` + ggsci::scale_color_npg()
