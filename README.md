@@ -68,45 +68,41 @@ x <- compas %>% select(Ethnicity, Sex) %>% evaluate_prediction_prob(
 ## Configuration completed.
 ```
 
-Quantify fairness (<font color="red">Table heading and metric
-definitions to be finalised</font>):
+Quantify fairness:
 
 ``` r
 summary(x)
 ```
 
-| Group                     | Equal opportunity difference | Equalised odds difference | BER equality difference |
-|:--------------------------|-----------------------------:|--------------------------:|------------------------:|
-| African American & Female |                         0.01 |                    -0.026 |                  -0.018 |
-| African American & Male   |                         0.29 |                     0.290 |                  -0.015 |
-| Caucasian & Female        |                        -0.29 |                    -0.290 |                   0.050 |
+| Group                     | TPR difference | FPR difference | BER difference |
+|:--------------------------|---------------:|---------------:|---------------:|
+| African American & Female |           0.01 |         -0.026 |         -0.018 |
+| African American & Male   |           0.29 |          0.259 |         -0.015 |
+| Caucasian & Female        |          -0.29 |         -0.189 |          0.050 |
 
 The reference group is Caucasian & Male
 
 Equal opportunity ensures that different groups have the same true
 positive rate (TPR), meaning the model correctly identifies positive
-cases equally well across all groups. We assess this by first
-calculating the difference in TPR between each group and a reference
-group, then comparing these differences across groups. Differences close
-to 0 indicate minimal bias.
+cases equally well across all groups. This can be assessed by comparing
+the difference in TPR from the reference group across groups.
+Differences close to 0 indicate minimal bias.
 
 Equalised odds ensure that different groups have the same true positive
 rate (TPR) and false positive rate (FPR), meaning the model is equally
-accurate and equally prone to errors across all groups. We assess this
-by first calculating the differences in each group’s TPR and FPR
-compared to those of a reference group, focusing on the larger
-disparity—whether in TPR or FPR—and then comparing these differences
-across groups. Differences close to 0 indicate minimal bias.
+accurate and equally prone to errors across all groups. This can be
+assessed by comparing the differences in each group’s TPR and FPR from
+those of a reference group across groups. Differences close to 0
+indicate minimal bias.
 
 Balanced error rate (BER) equality ensures that the BER is consistent
 across different groups. BER is the average of the false positive rate
 (FPR) and the false negative rate (FNR, which is 1 minus the true
 positive rate \[TPR\]). This means the model’s overall error rate,
 considering both false positives and false negatives, is uniform across
-all groups. We assess this by first calculating the difference in each
-group’s BER compared to that of a reference group, and then comparing
-these differences across groups. Differences close to 0 indicate minimal
-bias.
+all groups. This can be assessed by comparing the difference in each
+group’s BER from that of the reference group across groups. Differences
+close to 0 indicate minimal bias.
 
 ### Visualisation of fairness metrics
 

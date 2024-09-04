@@ -41,7 +41,7 @@ x <- compas %>% select(Ethnicity, Sex) %>% evaluate_prediction_prob(
 )
 ```
 
-Quantify fairness (<font color="red">Table heading and metric definitions to be finalised</font>):
+Quantify fairness:
 
 ```{r results='asis'}
 summary(x)
