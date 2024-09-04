@@ -234,22 +234,17 @@ summary.seeBias <- function(object, ...) {
     mutate(difference = .data$est -
              .data$est[which(.data$group == levels(.data$group)[1])]) %>%
     select(group, metric, ratio, difference)
-  # Equal opportunity
+  # TPR for Equal opportunity
   df_equal_opp <- df_metrics %>%
     filter(.data$metric == "TPR", .data$group != levels(.data$group)[1]) %>%
     select(-metric)
-  names(df_equal_opp) <- c("Group", "Equal opportunity ratio",
-                           "Equal opportunity difference")
-  # Equalised odds
+  names(df_equal_opp) <- c("Group", "TPR ratio", "TPR difference")
+  # FPR for Equalised odds
   df_equalised_odds <- df_metrics %>%
-    filter(.data$metric %in% c("FPR", "TPR"),
-           .data$group != levels(.data$group)[1]) %>%
-    group_by(.data$group) %>%
-    summarise(ratio = .data$ratio[which.max(abs(.data$difference))],
-              difference = .data$difference[which.max(abs(.data$difference))])
-  names(df_equalised_odds) <- c("Group", "Equalised odds ratio",
-                                "Equalised odds difference")
-  # Balanced error rate
+    filter(.data$metric %in% "FPR", .data$group != levels(.data$group)[1]) %>%
+    select(-metric)
+  names(df_equalised_odds) <- c("Group", "FPR ratio", "FPR difference")
+  # Balanced error rate (BER)
   df_ber <- object$performance_evaluation$df_metrics %>%
     filter(.data$metric %in% c("FPR", "TPR")) %>%
     select(group, metric, est) %>%
@@ -261,16 +256,16 @@ summary.seeBias <- function(object, ...) {
              .data$BER[which(.data$group == levels(.data$group)[1])]) %>%
     filter(.data$group != levels(.data$group)[1]) %>%
     select(group, ratio, difference)
-  names(df_ber) <- c("Group", "BER equality ratio", "BER equality difference")
+  names(df_ber) <- c("Group", "BER ratio", "BER difference")
   df_fairness <- merge(df_equal_opp, df_equalised_odds, by = "Group")
   df_fairness <- merge(df_fairness, df_ber, by = "Group")
-  vec_concept <- list(
-    `Equal opportunity ratio` = "Equal opportunity ensures that different groups have the same true positive rate (TPR), meaning the model correctly identifies positive cases equally well across all groups. We assess this by first calculating the ratio of TPR to a reference group for each group, and then comparing these ratios across groups. Ratios close to 1 indicate minimal bias.",
-    `Equal opportunity difference` = "Equal opportunity ensures that different groups have the same true positive rate (TPR), meaning the model correctly identifies positive cases equally well across all groups. We assess this by first calculating the difference in TPR between each group and a reference group, then comparing these differences across groups. Differences close to 0 indicate minimal bias.",
-    `Equalised odds ratio` = "Equalised odds ensure that different groups have the same true positive rate (TPR) and false positive rate (FPR), meaning the model is equally accurate and equally prone to errors across all groups. We assess this by first calculating the ratio of each group’s TPR and FPR to those of a reference group, focusing on the larger disparity—whether in TPR or FPR—and then comparing these ratios across groups. Ratios close to 1 indicate minimal bias.",
-    `Equalised odds difference` = "Equalised odds ensure that different groups have the same true positive rate (TPR) and false positive rate (FPR), meaning the model is equally accurate and equally prone to errors across all groups. We assess this by first calculating the differences in each group’s TPR and FPR compared to those of a reference group, focusing on the larger disparity—whether in TPR or FPR—and then comparing these differences across groups. Differences close to 0 indicate minimal bias.",
-    `BER equality ratio` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate [TPR]). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. We assess this by first calculating the ratio of BER to a reference group for each group, and then comparing these ratios across groups. Ratios close to 1 indicate minimal bias.",
-    `BER equality difference` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate [TPR]). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. We assess this by first calculating the difference in each group's BER compared to that of a reference group, and then comparing these differences across groups. Differences close to 0 indicate minimal bias."
+  vec_concept <- c(
+    `Equal opportunity as ratio` = "Equal opportunity ensures that different groups have the same true positive rate (TPR), meaning the model correctly identifies positive cases equally well across all groups. This can be assessed by comparing the ratio of TPR to the reference group across groups. Ratios close to 1 indicate minimal bias.",
+    `Equal opportunity as difference` = "Equal opportunity ensures that different groups have the same true positive rate (TPR), meaning the model correctly identifies positive cases equally well across all groups. This can be assessed by comparing the difference in TPR from the reference group across groups. Differences close to 0 indicate minimal bias.",
+    `Equalised odds as ratio` = "Equalised odds ensure that different groups have the same true positive rate (TPR) and false positive rate (FPR), meaning the model is equally accurate and equally prone to errors across all groups. This can be assessed by comparing the ratio of each group’s TPR and FPR to those of the reference group across groups. Ratios close to 1 indicate minimal bias.",
+    `Equalised odds as difference` = "Equalised odds ensure that different groups have the same true positive rate (TPR) and false positive rate (FPR), meaning the model is equally accurate and equally prone to errors across all groups. This can be assessed by comparing the differences in each group’s TPR and FPR from those of a reference group across groups. Differences close to 0 indicate minimal bias.",
+    `BER equality as ratio` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate [TPR]). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. This can be assessed by comparing the ratio of BER to the reference group across groups. Ratios close to 1 indicate minimal bias.",
+    `BER equality as difference` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate [TPR]). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. This can be assessed by comparing the difference in each group's BER from that of the reference group across groups. Differences close to 0 indicate minimal bias."
   )
   obj_summ <- list(fairness_metrics = df_fairness,
                    fairness_metrics_concept = vec_concept,
@@ -293,15 +288,18 @@ print.summary.seeBias <- function(object, ..., digits = 3,
   metric_type <- match.arg(arg = tolower(metric_type),
                            choices = c("difference", "ratio", "all"))
   df_fairness <- object$fairness_metrics
-  metric_names <- c("Equal opportunity", "Equalised odds", "BER equality")
+  # metric_names <- c("Equal opportunity", "Equalised odds", "BER equality")
+  metric_names <- c("TPR", "FPR", "BER")
   names_diff <- paste(metric_names, "difference")
+  cols_diff <- which(names(df_fairness) %in% names_diff)
   names_ratio <- paste(metric_names, "ratio")
+  cols_ratio <- which(names(df_fairness) %in% names_ratio)
   if (metric_type == "difference") {
     df_fairness <- df_fairness[, c("Group", names_diff)]
-    vec_concept <- object$fairness_metrics_concept[names_diff]
+    vec_concept <- object$fairness_metrics_concept[cols_diff - 1]
   } else if (metric_type == "ratio") {
     df_fairness <- df_fairness[, c("Group", names_ratio)]
-    vec_concept <- object$fairness_metrics_concept[names_ratio]
+    vec_concept <- object$fairness_metrics_concept[cols_ratio - 1]
   } else {
     df_fairness <- df_fairness
     vec_concept <- object$fairness_metrics_concept
