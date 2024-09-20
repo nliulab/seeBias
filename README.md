@@ -5,10 +5,12 @@ seeBias: Fairness Evaluation and Visualisation
   - [Fairness metrics](#fairness-metrics)
   - [Visualisation of fairness
     metrics](#visualisation-of-fairness-metrics)
+  - [Alternative color scheme](#alternative-color-scheme)
 
 ## Demo
 
-Use subset of COMPAS data for Caucasian and African American.
+Use subset of COMPAS data for Caucasian and African American. Exclude
+race and sex from the prediction model.
 
 ``` r
 library(dplyr)
@@ -46,8 +48,18 @@ table(compas$Two_yr_Recidivism, compas$Ethnicity)
 compas <- compas %>% filter(Ethnicity %in% c("Caucasian", "African_American"))
 compas$Ethnicity <- ifelse(compas$Ethnicity == "African_American",
                            "African American", as.character(compas$Ethnicity))
-m <- glm(Two_yr_Recidivism ~ ., data = compas, family = "binomial")
+m <- compas %>% select(-Ethnicity, -Sex) %>% 
+  glm(Two_yr_Recidivism ~ ., data = ., family = "binomial")
+knitr::kable(summary(m)$coef, digits = 3)
 ```
+
+|                       | Estimate | Std. Error | z value | Pr(\>\|z\|) |
+|:----------------------|---------:|-----------:|--------:|------------:|
+| (Intercept)           |   -0.631 |      0.054 | -11.692 |       0.000 |
+| Number_of_Priors      |    0.169 |      0.008 |  20.406 |       0.000 |
+| Age_Above_FourtyFive1 |   -0.711 |      0.081 |  -8.774 |       0.000 |
+| Age_Below_TwentyFive1 |    0.753 |      0.074 |  10.175 |       0.000 |
+| Misdemeanor1          |   -0.204 |      0.063 |  -3.219 |       0.001 |
 
 ### Fairness metrics
 
@@ -61,7 +73,7 @@ x <- compas %>% select(Ethnicity, Sex) %>% evaluate_prediction_prob(
   y_obs = compas$Two_yr_Recidivism, y_pos = "1",
   sens_var = ., sens_var_ref = c("Caucasian", "Male")
 )
-## Threshold=0.448 set by ROC analysis.
+## Threshold=0.440 set by ROC analysis.
 ## Configuring sensitive variables ...
 ##     4 subgroups based on sensitive variables ('sens_var'): African American & Female, Caucasian & Female, African American & Male, Caucasian & Male.
 ##     Reference group: Caucasian & Male.
@@ -76,9 +88,9 @@ summary(x)
 
 | Group                     | TPR difference | FPR difference | BER difference |
 |:--------------------------|---------------:|---------------:|---------------:|
-| African American & Female |           0.01 |         -0.026 |         -0.018 |
-| African American & Male   |           0.29 |          0.259 |         -0.015 |
-| Caucasian & Female        |          -0.29 |         -0.189 |          0.050 |
+| African American & Female |          0.173 |          0.130 |         -0.021 |
+| African American & Male   |          0.242 |          0.194 |         -0.024 |
+| Caucasian & Female        |         -0.096 |         -0.026 |          0.035 |
 
 The reference group is Caucasian & Male
 
@@ -112,7 +124,43 @@ x_plots <- plot(x)
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-Alternative color scheme:
+``` r
+x_plots$`ROC curves`
+```
+
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+``` r
+x_plots$`Calibration in the large`
+```
+
+![](README_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+
+``` r
+x_plots$`Calibration curves`
+```
+
+![](README_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+
+``` r
+x_plots$`Boxplot of predictions`
+```
+
+![](README_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->
+
+``` r
+x_plots$`Numbers needed for true positive`
+```
+
+![](README_files/figure-gfm/unnamed-chunk-5-5.png)<!-- -->
+
+``` r
+x_plots$`Numbers needed for true negative`
+```
+
+![](README_files/figure-gfm/unnamed-chunk-5-6.png)<!-- -->
+
+### Alternative color scheme
 
 ``` r
 x_plots$`Performance metrics` + ggsci::scale_fill_npg()
@@ -120,7 +168,7 @@ x_plots$`Performance metrics` + ggsci::scale_fill_npg()
 ## Adding another scale for fill, which will replace the existing scale.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 x_plots$`ROC curves` + ggsci::scale_color_npg()
@@ -128,7 +176,7 @@ x_plots$`ROC curves` + ggsci::scale_color_npg()
 ## Adding another scale for colour, which will replace the existing scale.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 x_plots$`Calibration in the large` + ggsci::scale_fill_npg()
@@ -136,7 +184,7 @@ x_plots$`Calibration in the large` + ggsci::scale_fill_npg()
 ## Adding another scale for fill, which will replace the existing scale.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ``` r
 x_plots$`Calibration curves` + ggsci::scale_color_npg()
@@ -144,7 +192,7 @@ x_plots$`Calibration curves` + ggsci::scale_color_npg()
 ## Adding another scale for colour, which will replace the existing scale.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
 
 ``` r
 x_plots$`Boxplot of predictions` + ggsci::scale_color_npg()
@@ -152,7 +200,7 @@ x_plots$`Boxplot of predictions` + ggsci::scale_color_npg()
 ## Adding another scale for colour, which will replace the existing scale.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
 
 ``` r
 x_plots$`Numbers needed for true positive` + ggsci::scale_color_npg()
@@ -160,7 +208,7 @@ x_plots$`Numbers needed for true positive` + ggsci::scale_color_npg()
 ## Adding another scale for colour, which will replace the existing scale.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
 
 ``` r
 x_plots$`Numbers needed for true negative` + ggsci::scale_color_npg()
@@ -168,4 +216,4 @@ x_plots$`Numbers needed for true negative` + ggsci::scale_color_npg()
 ## Adding another scale for colour, which will replace the existing scale.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->

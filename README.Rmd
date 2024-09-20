@@ -6,13 +6,14 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, 
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, cache = FALSE,
                       fig.width = 10, fig.height = 6)
 ```
 
 ## Demo
 
-Use subset of COMPAS data for Caucasian and African American.
+Use subset of COMPAS data for Caucasian and African American. Exclude race and 
+sex from the prediction model.
 
 ```{r}
 library(dplyr)
@@ -24,7 +25,9 @@ table(compas$Two_yr_Recidivism, compas$Ethnicity)
 compas <- compas %>% filter(Ethnicity %in% c("Caucasian", "African_American"))
 compas$Ethnicity <- ifelse(compas$Ethnicity == "African_American",
                            "African American", as.character(compas$Ethnicity))
-m <- glm(Two_yr_Recidivism ~ ., data = compas, family = "binomial")
+m <- compas %>% select(-Ethnicity, -Sex) %>% 
+  glm(Two_yr_Recidivism ~ ., data = ., family = "binomial")
+knitr::kable(summary(m)$coef, digits = 3)
 ```
 
 ### Fairness metrics
@@ -53,7 +56,17 @@ summary(x)
 x_plots <- plot(x)
 ```
 
-Alternative color scheme:
+
+```{r, fig.width=4, fig.height=4}
+x_plots$`ROC curves`
+x_plots$`Calibration in the large`
+x_plots$`Calibration curves`
+x_plots$`Boxplot of predictions`
+x_plots$`Numbers needed for true positive`
+x_plots$`Numbers needed for true negative`
+```
+
+### Alternative color scheme
 
 ```{r}
 x_plots$`Performance metrics` + ggsci::scale_fill_npg()
