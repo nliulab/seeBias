@@ -114,7 +114,7 @@ eval_metrics_group <- function(y_pred, y_obs, sens_var) {
   sens_var_ref <- levels(sens_var)[1]
   # Performance metrics
   df_metrics <- do.call("rbind", lapply(thresholds, function(th) {
-    y_pred_bin <- factor(as.numeric(y_pred > th))
+    y_pred_bin <- factor(as.numeric(y_pred >= th))
     do.call("rbind", lapply(levels(sens_var), function(var) {
       i <- which(sens_var == var)
       p_obs <- mean(y_obs[i] == y_pos)

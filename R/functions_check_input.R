@@ -114,7 +114,7 @@ check_pred_prob <- function(y_pred, y_pred_threshold, y_obs) {
     ))
   }
   list(y_pred = y_pred, y_pred_threshold = y_pred_threshold,
-       y_pred_bin = factor(as.numeric(y_pred > y_pred_threshold)))
+       y_pred_bin = factor(as.numeric(y_pred >= y_pred_threshold)))
 }
 #' Check predicted score
 #' @inheritParams evaluate_prediction_score
@@ -158,7 +158,7 @@ check_pred_score <- function(y_pred, y_pred_threshold, y_obs) {
            data = data.frame(y_obs = y_obs, y_pred = y_pred))
   list(y_pred = y_pred, y_pred_threshold = y_pred_threshold,
        y_pred_prob = predict(object = m, type = "response"),
-       y_pred_bin = factor(as.numeric(y_pred > y_pred_threshold)))
+       y_pred_bin = factor(as.numeric(y_pred >= y_pred_threshold)))
 }
 #' <Private function> Convert sensitive variable(s) to a data.frame of vector(s)
 #' @inheritParams evaluate_prediction_prob

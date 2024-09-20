@@ -46,7 +46,7 @@ evaluate_prediction_bin(
 missing value.}
 
 \item{y_pred_threshold}{Threshold for \code{y_pred}. Predict positive label
-if \code{y_pred > y_pred_threshold}. Default is \code{NULL}, in which case
+if \code{y_pred >= y_pred_threshold}. Default is \code{NULL}, in which case
 the threshold will be selected based on the ROC curve for \code{y_pred}.}
 
 \item{y_obs}{A vector of observed binary outcome. Can be numeric, character
