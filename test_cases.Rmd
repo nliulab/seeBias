@@ -47,7 +47,7 @@ summary(x)
 x_plots$`Performance metrics`
 ```
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=7, fig.height=4}
 x_plots$`ROC curves`
 x_plots$`Calibration in the large`
 x_plots$`Calibration curves`
@@ -62,7 +62,7 @@ User define color scheme:
 x_plots$`Performance metrics` + ggsci::scale_fill_npg()
 ```
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=7, fig.height=4}
 x_plots$`ROC curves` + ggsci::scale_color_npg()
 x_plots$`Calibration in the large` + ggsci::scale_fill_npg()
 x_plots$`Calibration curves` + ggsci::scale_color_npg()
@@ -73,7 +73,7 @@ x_plots$`Numbers needed for true negative` + ggsci::scale_color_npg()
 
 ## Multiple sensitive variables
 
-```{r}
+```{r, fig.width=10, fig.height=6}
 x2 <- evaluate_prediction_prob(
   y_pred = predict(m, newdata = compas, type = "response"), 
   y_obs = compas$Two_yr_Recidivism, y_pos = "1",
@@ -88,7 +88,7 @@ x_plots2 <- plot(x2, print_statistics = FALSE)
 summary(x2)
 ```
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=7, fig.height=4}
 x_plots2$`ROC curves`
 x_plots2$`Calibration in the large`
 x_plots2$`Calibration curves`
@@ -99,7 +99,7 @@ x_plots2$`Numbers needed for true negative`
 
 ## Specify predicted scores
 
-```{r}
+```{r, fig.width=10, fig.height=6}
 x3 <- evaluate_prediction_score(
   y_pred = predict(m, newdata = compas), 
   y_obs = compas$Two_yr_Recidivism, y_pos = "1",
@@ -114,7 +114,7 @@ x_plots3 <- plot(x3, print_statistics = FALSE)
 summary(x3)
 ```
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=7, fig.height=4}
 x_plots3$`ROC curves`
 x_plots3$`Calibration in the large`
 x_plots3$`Calibration curves`
