@@ -53,15 +53,30 @@ scale_fill_branded <- function(primary = "blue", other = "red", direction = 1,
   ggplot2::discrete_scale(aesthetics = "fill", scale_name = "branded",
                           palette = branded_pal(primary, other, direction), ...)
 }
+#' #' Select appropriate color/fill scale based on number of sensitive groups
+#' #' @param x seeBias object.
+#' #' @param type Type to return, either "color" or "fill".
+#' select_scale_old <- function(x, type = "color") {
+#'   type <- match.arg(arg = type, choices = c("color", "fill"))
+#'   n_sens <- x$input$n_sens
+#'   if (n_sens > 6) {
+#'     if (type == "color") scale_color_discrete else scale_fill_discrete
+#'   } else {
+#'     if (type == "color") scale_color_branded else scale_fill_branded
+#'   }
+#' }
 #' Select appropriate color/fill scale based on number of sensitive groups
-#' @param x FairPkg object.
+#' @param x seeBias object.
 #' @param type Type to return, either "color" or "fill".
+#' @importFrom ggsci scale_color_jama scale_fill_jama
+#' @importFrom ggplot2 scale_color_discrete scale_fill_discrete
 select_scale <- function(x, type = "color") {
   type <- match.arg(arg = type, choices = c("color", "fill"))
   n_sens <- x$input$n_sens
-  if (n_sens > 6) {
+  if (n_sens > 7) {
     if (type == "color") scale_color_discrete else scale_fill_discrete
   } else {
-    if (type == "color") scale_color_branded else scale_fill_branded
+    if (type == "color") ggsci::scale_color_jama else ggsci::scale_fill_jama
   }
 }
+
