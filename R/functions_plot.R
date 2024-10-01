@@ -237,7 +237,10 @@ plot_score <- function(x) {
           axis.ticks.y = element_blank(),
           panel.spacing = unit(0, "cm"),
           panel.border = element_rect(fill = NA, colour = "black", linewidth = 0.5)) +
-    guides(color = guide_legend(ncol = 1), linetype = "none")
+    guides(
+      color = guide_legend(ncol = 1, title = "Group"),
+      linetype = guide_legend(ncol = 1, title = "Label")
+    )
 }
 
 #' Private function to plot numbers needed by group
