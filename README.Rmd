@@ -7,7 +7,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, cache = FALSE,
-                      fig.width = 10, fig.height = 6)
+                      fig.height = 4)
 ```
 
 ## Demo
@@ -52,31 +52,30 @@ summary(x)
 
 ### Visualisation of fairness metrics
 
-```{r}
+```{r, fig.width = 10, fig.height = 6}
 x_plots <- plot(x)
 ```
 
-
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=7.5}
 x_plots$`ROC curves`
+```
+
+```{r, fig.width=6}
 x_plots$`Calibration in the large`
+```
+
+```{r, fig.width=6.5}
 x_plots$`Calibration curves`
+```
+
+```{r, fig.width=6}
 x_plots$`Boxplot of predictions`
+```
+
+```{r, fig.width=6.5}
 x_plots$`Numbers needed for true positive`
+```
+
+```{r, fig.width=6.5}
 x_plots$`Numbers needed for true negative`
-```
-
-### Alternative color scheme
-
-```{r}
-x_plots$`Performance metrics` + ggsci::scale_fill_npg()
-```
-
-```{r, fig.width=7, fig.height=4}
-x_plots$`ROC curves` + ggsci::scale_color_npg()
-x_plots$`Calibration in the large` + ggsci::scale_fill_npg()
-x_plots$`Calibration curves` + ggsci::scale_color_npg()
-x_plots$`Boxplot of predictions` + ggsci::scale_color_npg()
-x_plots$`Numbers needed for true positive` + ggsci::scale_color_npg()
-x_plots$`Numbers needed for true negative` + ggsci::scale_color_npg()
 ```

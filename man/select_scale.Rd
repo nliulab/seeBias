@@ -2,19 +2,7 @@
 % Please edit documentation in R/functions_color_fill.R
 \name{select_scale}
 \alias{select_scale}
-\title{#' Select appropriate color/fill scale based on number of sensitive groups
-#' @param x seeBias object.
-#' @param type Type to return, either "color" or "fill".
-select_scale_old <- function(x, type = "color") {
-  type <- match.arg(arg = type, choices = c("color", "fill"))
-  n_sens <- x$input$n_sens
-  if (n_sens > 6) {
-    if (type == "color") scale_color_discrete else scale_fill_discrete
-  } else {
-    if (type == "color") scale_color_branded else scale_fill_branded
-  }
-}
-Select appropriate color/fill scale based on number of sensitive groups}
+\title{Select appropriate color/fill scale based on number of sensitive groups}
 \usage{
 select_scale(x, type = "color")
 }
@@ -24,17 +12,5 @@ select_scale(x, type = "color")
 \item{type}{Type to return, either "color" or "fill".}
 }
 \description{
-#' Select appropriate color/fill scale based on number of sensitive groups
-#' @param x seeBias object.
-#' @param type Type to return, either "color" or "fill".
-select_scale_old <- function(x, type = "color") {
-  type <- match.arg(arg = type, choices = c("color", "fill"))
-  n_sens <- x$input$n_sens
-  if (n_sens > 6) {
-    if (type == "color") scale_color_discrete else scale_fill_discrete
-  } else {
-    if (type == "color") scale_color_branded else scale_fill_branded
-  }
-}
 Select appropriate color/fill scale based on number of sensitive groups
 }

@@ -5,7 +5,6 @@ seeBias: Fairness Evaluation and Visualisation
   - [Fairness metrics](#fairness-metrics)
   - [Visualisation of fairness
     metrics](#visualisation-of-fairness-metrics)
-  - [Alternative color scheme](#alternative-color-scheme)
 
 ## Demo
 
@@ -134,86 +133,28 @@ x_plots$`ROC curves`
 x_plots$`Calibration in the large`
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 x_plots$`Calibration curves`
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 x_plots$`Boxplot of predictions`
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 x_plots$`Numbers needed for true positive`
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-5.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 x_plots$`Numbers needed for true negative`
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-6.png)<!-- -->
-
-### Alternative color scheme
-
-``` r
-x_plots$`Performance metrics` + ggsci::scale_fill_npg()
-## Scale for fill is already present.
-## Adding another scale for fill, which will replace the existing scale.
-```
-
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
-
-``` r
-x_plots$`ROC curves` + ggsci::scale_color_npg()
-## Scale for colour is already present.
-## Adding another scale for colour, which will replace the existing scale.
-```
-
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
-``` r
-x_plots$`Calibration in the large` + ggsci::scale_fill_npg()
-## Scale for fill is already present.
-## Adding another scale for fill, which will replace the existing scale.
-```
-
-![](README_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
-
-``` r
-x_plots$`Calibration curves` + ggsci::scale_color_npg()
-## Scale for colour is already present.
-## Adding another scale for colour, which will replace the existing scale.
-```
-
-![](README_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
-
-``` r
-x_plots$`Boxplot of predictions` + ggsci::scale_color_npg()
-## Scale for colour is already present.
-## Adding another scale for colour, which will replace the existing scale.
-```
-
-![](README_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
-
-``` r
-x_plots$`Numbers needed for true positive` + ggsci::scale_color_npg()
-## Scale for colour is already present.
-## Adding another scale for colour, which will replace the existing scale.
-```
-
-![](README_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
-
-``` r
-x_plots$`Numbers needed for true negative` + ggsci::scale_color_npg()
-## Scale for colour is already present.
-## Adding another scale for colour, which will replace the existing scale.
-```
-
-![](README_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
