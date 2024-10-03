@@ -106,10 +106,11 @@ eval_calib <- function(y_pred, y_obs, sens_var) {
 #' @param sens_var Sensitive variable.
 #' @importFrom tidyr pivot_wider
 eval_metrics_group <- function(y_pred, y_obs, sens_var) {
-  thresholds <- quantile(
+  # Some quantiles may have the same value. Take unique values only
+  thresholds <- unique(quantile(
     x = y_pred,
     probs = setdiff(seq(from = 0, to = 1, by = 0.1), c(0, 1))
-  )
+  ))
   y_pos <- "1"
   sens_var_ref <- levels(sens_var)[1]
   # Performance metrics
