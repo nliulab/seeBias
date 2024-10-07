@@ -72,13 +72,12 @@ x_plots <- plot(x)
 summary(x)
 ```
 
-| Group            | TPR difference | FPR difference | BER difference |
-|:-----------------|---------------:|---------------:|---------------:|
-| African American |          0.274 |          0.190 |         -0.042 |
-| Hispanic         |         -0.010 |         -0.036 |         -0.013 |
-| Other            |         -0.067 |         -0.083 |         -0.008 |
-
-The reference group is Caucasian
+| Group            | TPR difference | FPR difference | TNR difference | BER difference |
+|:-----------------|:---------------|:---------------|:---------------|:---------------|
+| Caucasian        | Reference      | Reference      | Reference      | Reference      |
+| African American | 0.274          | 0.19           | -0.19          | -0.042         |
+| Hispanic         | -0.01          | -0.036         | 0.036          | -0.013         |
+| Other            | -0.067         | -0.083         | 0.083          | -0.008         |
 
 Equal opportunity ensures that different groups have the same true
 positive rate (TPR), meaning the model correctly identifies positive
@@ -238,17 +237,16 @@ x_plots2 <- plot(x2, print_statistics = FALSE)
 summary(x2)
 ```
 
-| Group                     | TPR difference | FPR difference | BER difference |
-|:--------------------------|---------------:|---------------:|---------------:|
-| African American & Female |          0.010 |         -0.026 |         -0.018 |
-| African American & Male   |          0.242 |          0.194 |         -0.024 |
-| Caucasian & Female        |         -0.296 |         -0.189 |          0.053 |
-| Hispanic & Female         |         -0.306 |         -0.248 |          0.029 |
-| Hispanic & Male           |         -0.034 |         -0.047 |         -0.006 |
-| Other & Female            |         -0.323 |         -0.266 |          0.028 |
-| Other & Male              |         -0.106 |         -0.096 |          0.005 |
-
-The reference group is Caucasian & Male
+| Group                     | TPR difference | FPR difference | TNR difference | BER difference |
+|:--------------------------|:---------------|:---------------|:---------------|:---------------|
+| Caucasian & Male          | Reference      | Reference      | Reference      | Reference      |
+| African American & Female | 0.01           | -0.026         | 0.026          | -0.018         |
+| African American & Male   | 0.242          | 0.194          | -0.194         | -0.024         |
+| Caucasian & Female        | -0.296         | -0.189         | 0.189          | 0.053          |
+| Hispanic & Female         | -0.306         | -0.248         | 0.248          | 0.029          |
+| Hispanic & Male           | -0.034         | -0.047         | 0.047          | -0.006         |
+| Other & Female            | -0.323         | -0.266         | 0.266          | 0.028          |
+| Other & Male              | -0.106         | -0.096         | 0.096          | 0.005          |
 
 Equal opportunity ensures that different groups have the same true
 positive rate (TPR), meaning the model correctly identifies positive
@@ -346,17 +344,16 @@ x_plots3 <- plot(x3, print_statistics = FALSE)
 summary(x3)
 ```
 
-| Group                     | TPR difference | FPR difference | BER difference |
-|:--------------------------|---------------:|---------------:|---------------:|
-| African American & Female |          0.010 |         -0.026 |         -0.018 |
-| African American & Male   |          0.242 |          0.194 |         -0.024 |
-| Caucasian & Female        |         -0.296 |         -0.189 |          0.053 |
-| Hispanic & Female         |         -0.306 |         -0.248 |          0.029 |
-| Hispanic & Male           |         -0.034 |         -0.047 |         -0.006 |
-| Other & Female            |         -0.323 |         -0.266 |          0.028 |
-| Other & Male              |         -0.106 |         -0.096 |          0.005 |
-
-The reference group is Caucasian & Male
+| Group                     | TPR difference | FPR difference | TNR difference | BER difference |
+|:--------------------------|:---------------|:---------------|:---------------|:---------------|
+| Caucasian & Male          | Reference      | Reference      | Reference      | Reference      |
+| African American & Female | 0.01           | -0.026         | 0.026          | -0.018         |
+| African American & Male   | 0.242          | 0.194          | -0.194         | -0.024         |
+| Caucasian & Female        | -0.296         | -0.189         | 0.189          | 0.053          |
+| Hispanic & Female         | -0.306         | -0.248         | 0.248          | 0.029          |
+| Hispanic & Male           | -0.034         | -0.047         | 0.047          | -0.006         |
+| Other & Female            | -0.323         | -0.266         | 0.266          | 0.028          |
+| Other & Male              | -0.106         | -0.096         | 0.096          | 0.005          |
 
 Equal opportunity ensures that different groups have the same true
 positive rate (TPR), meaning the model correctly identifies positive

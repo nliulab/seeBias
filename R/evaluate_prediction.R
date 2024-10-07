@@ -244,6 +244,11 @@ summary.seeBias <- function(object, ...) {
     filter(.data$metric %in% "FPR", .data$group != levels(.data$group)[1]) %>%
     select(-metric)
   names(df_equalised_odds) <- c("Group", "FPR ratio", "FPR difference")
+  # TNR as an alternative to FPR
+  df_tnr <- df_metrics %>%
+    filter(.data$metric %in% "TNR", .data$group != levels(.data$group)[1]) %>%
+    select(-metric)
+  names(df_tnr) <- c("Group", "TNR ratio", "TNR difference")
   # Balanced error rate (BER)
   df_ber <- object$performance_evaluation$df_metrics %>%
     filter(.data$metric %in% c("FPR", "TPR")) %>%
@@ -258,6 +263,7 @@ summary.seeBias <- function(object, ...) {
     select(group, ratio, difference)
   names(df_ber) <- c("Group", "BER ratio", "BER difference")
   df_fairness <- merge(df_equal_opp, df_equalised_odds, by = "Group")
+  df_fairness <- merge(df_fairness, df_tnr, by = "Group")
   df_fairness <- merge(df_fairness, df_ber, by = "Group")
   vec_concept <- c(
     `Equal opportunity as ratio` = "Equal opportunity ensures that different groups have the same true positive rate (TPR), meaning the model correctly identifies positive cases equally well across all groups. This can be assessed by comparing the ratio of TPR to the reference group across groups. Ratios close to 1 indicate minimal bias.",
@@ -289,23 +295,29 @@ print.summary.seeBias <- function(object, ..., digits = 3,
                            choices = c("difference", "ratio", "all"))
   df_fairness <- object$fairness_metrics
   # metric_names <- c("Equal opportunity", "Equalised odds", "BER equality")
-  metric_names <- c("TPR", "FPR", "BER")
+  metric_names <- c("TPR", "FPR", "TNR", "BER")
   names_diff <- paste(metric_names, "difference")
   cols_diff <- which(names(df_fairness) %in% names_diff)
   names_ratio <- paste(metric_names, "ratio")
   cols_ratio <- which(names(df_fairness) %in% names_ratio)
   if (metric_type == "difference") {
     df_fairness <- df_fairness[, c("Group", names_diff)]
-    vec_concept <- object$fairness_metrics_concept[cols_diff - 1]
+    vec_concept <- object$fairness_metrics_concept[cols_diff[-4] - 1]
   } else if (metric_type == "ratio") {
     df_fairness <- df_fairness[, c("Group", names_ratio)]
-    vec_concept <- object$fairness_metrics_concept[cols_ratio - 1]
+    vec_concept <- object$fairness_metrics_concept[cols_ratio[-4] - 1]
   } else {
     df_fairness <- df_fairness
     vec_concept <- object$fairness_metrics_concept
   }
-  print(knitr::kable(df_fairness, digits = digits, row.names = FALSE))
+  df_fairness_print <- df_fairness
+  df_fairness_print[, -1] <- round(df_fairness[, -1], digits = digits)
+  df_fairness_ref <- df_fairness[1, ]
+  df_fairness_ref$Group <- object$sens_var_ref
+  df_fairness_ref[, -1] <- "Reference"
+  print(knitr::kable(rbind(df_fairness_ref, df_fairness_print),
+                     digits = digits, row.names = FALSE))
   cat("\n")
-  cat("The reference group is", object$sens_var_ref, "\n\n")
+  # cat("The reference group is", object$sens_var_ref, "\n\n")
   for (v in vec_concept) cat(v, "\n\n")
 }

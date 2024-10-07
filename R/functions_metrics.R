@@ -44,12 +44,13 @@ eval_pred <- function(y_pred_bin, y_obs, y_pos = "1") {
   FP <- sum(y_pred_bin == y_pos & y_obs == y_neg)
   FN <- sum(y_pred_bin == y_neg & y_obs == y_pos)
   df <- cbind(
-    metric = c("Accuracy", "PPV", "NPV", "TPR", "FPR"),
+    metric = c("Accuracy", "PPV", "NPV", "TPR", "FPR", "TNR"),
     rbind(compute_ci_cp(numerator = TP + TN, denominator = n),
           compute_ci_cp(numerator = TP, denominator = TP + FP),
           compute_ci_cp(numerator = TN, denominator = TN + FN),
           compute_ci_cp(numerator = TP, denominator = TP + FN),
-          compute_ci_cp(numerator = FP, denominator = FP + TN))
+          compute_ci_cp(numerator = FP, denominator = FP + TN),
+          compute_ci_cp(numerator = TN, denominator = FP + TN))
   )
   df
 }

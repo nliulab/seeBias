@@ -17,6 +17,10 @@ common_theme_small <- function() {
 #' @importFrom rlang .data
 plot_metrics <- function(x) {
   df_metrics <- x$performance_evaluation$df_metrics
+  # Includes TNR, which is not needed now, so remove. Also need to reset levels
+  df_metrics$metric <- factor(as.character(df_metrics$metric),
+                              levels = setdiff(levels(df_metrics$metric), "TNR"))
+  df_metrics <- df_metrics[which(df_metrics$metric != "TNR"), ]
   f_scale_fill <- select_scale(x = x, type = "fill")
   n_sens <- x$input$n_sens
   w_sens <- 0.8 / n_sens

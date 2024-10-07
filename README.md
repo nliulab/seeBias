@@ -85,13 +85,12 @@ Quantify fairness:
 summary(x)
 ```
 
-| Group                     | TPR difference | FPR difference | BER difference |
-|:--------------------------|---------------:|---------------:|---------------:|
-| African American & Female |          0.173 |          0.130 |         -0.021 |
-| African American & Male   |          0.242 |          0.194 |         -0.024 |
-| Caucasian & Female        |         -0.096 |         -0.026 |          0.035 |
-
-The reference group is Caucasian & Male
+| Group                     | TPR difference | FPR difference | TNR difference | BER difference |
+|:--------------------------|:---------------|:---------------|:---------------|:---------------|
+| Caucasian & Male          | Reference      | Reference      | Reference      | Reference      |
+| African American & Female | 0.173          | 0.13           | -0.13          | -0.021         |
+| African American & Male   | 0.242          | 0.194          | -0.194         | -0.024         |
+| Caucasian & Female        | -0.096         | -0.026         | 0.026          | 0.035          |
 
 Equal opportunity ensures that different groups have the same true
 positive rate (TPR), meaning the model correctly identifies positive
