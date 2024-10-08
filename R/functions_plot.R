@@ -190,6 +190,8 @@ plot_calibration <- function(x, print_statistics) {
     geom_abline(intercept = 0, slope = 1, lty = 2) +
     geom_point() +
     geom_line() +
+    scale_x_continuous(expand = c(0.05, 0), limits = c(0, 1)) +
+    scale_y_continuous(expand = c(0.05, 0), limits = c(0, 1)) +
     labs(x = "Predicted probability midpoint", y = "Observed probability",
          title = "Calibration curves",
          subtitle = "Expect curves close to diagonal & slope close to 1") +
@@ -210,26 +212,35 @@ plot_calibration <- function(x, print_statistics) {
 #' @importFrom rlang .data
 #' @importFrom stats quantile
 plot_score <- function(x) {
+  if (x$input$type == "prob") {
+    labs_x <- "Predicted probability"
+    labs_title <- "Distribution of predicted probability"
+  } else if (x$input$type == "score") {
+    labs_x <- "Predicted score"
+    labs_title <- "Distribution of predicted score"
+  } else {
+    return(NULL)
+  }
   f_scale_color <- select_scale(x = x, type = "color")
   df <- data.frame(y_pred = x$input$data$y_pred,
                    Label = factor(x$input$data$y_obs, levels = c(1, 0)),
                    Group = x$input$data$sens_var)
-  df$y_group <- interaction(df$Group, df$Label, sep = ", label=",
-                            lex.order = TRUE)
-  df$y_group <- factor(df$y_group, levels = rev(levels(df$y_group)))
-  n_y_group <- length(unique(df$y_group))
+  # df$y_group <- interaction(df$Group, df$Label, sep = ", label=",
+  #                           lex.order = TRUE)
+  # df$y_group <- factor(df$y_group, levels = rev(levels(df$y_group)))
+  # n_y_group <- length(unique(df$y_group))
+  n_group <- length(unique(df$Group))
 
   ggplot(data = df,
-         aes(y = .data$y_group, x = .data$y_pred, color = .data$Group,
+         aes(y = .data$Group, x = .data$y_pred, color = .data$Group,
              lty = .data$Label)) +
     geom_boxplot() +
-    geom_vline(xintercept = x$y_pred_threshold, color = "grey") +
-    scale_x_continuous(sec.axis = dup_axis(
-      name = "", breaks = x$y_pred_threshold, labels = "Threshold"
-    )) +
-    coord_cartesian(ylim = c(1, n_y_group), clip = "off") +
-    labs(x = "Predicted probability/score", y = "",
-         title = "Distribution of predicted probability/score") +
+    # geom_vline(xintercept = x$y_pred_threshold, color = "grey") +
+    # scale_x_continuous(sec.axis = dup_axis(
+    #   name = "", breaks = x$y_pred_threshold, labels = "Threshold"
+    # )) +
+    coord_cartesian(ylim = c(1, n_group), clip = "off") +
+    labs(x = labs_x, y = "", title = labs_title) +
     f_scale_color() +
     theme_bw() +
     common_theme_small() +
