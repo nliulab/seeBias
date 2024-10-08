@@ -60,6 +60,7 @@ evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
         y_pred_bin = input_pred$y_pred_bin,
         sens_var = sens_var
       ),
+      type = "prob",
       y_pred_threshold = input_pred$y_pred_threshold,
       sens_var_ref = sens_var_ref,
       n_sens = length(levels(sens_var))
@@ -127,6 +128,7 @@ evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
         y_pred_bin = input_pred$y_pred_bin,
         sens_var = sens_var
       ),
+      type = "score",
       y_pred_threshold = input_pred$y_pred_threshold,
       sens_var_ref = sens_var_ref,
       n_sens = length(levels(sens_var))
@@ -179,6 +181,7 @@ evaluate_prediction_bin <- function(y_pred, y_obs, y_pos = "1",
         y_pred_bin = y_pred,
         sens_var = sens_var
       ),
+      type = "bin",
       y_pred_threshold = NULL,
       sens_var_ref = sens_var_ref,
       n_sens = length(levels(sens_var))
