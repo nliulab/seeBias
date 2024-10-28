@@ -134,13 +134,13 @@ x_plots$`Boxplot of predictions`
 ![](test_cases_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
 
 ``` r
-x_plots$`Numbers needed for true positive`
+x_plots$`Number needed for true positive`
 ```
 
 ![](test_cases_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
 
 ``` r
-x_plots$`Numbers needed for true negative`
+x_plots$`Number needed for true negative`
 ```
 
 ![](test_cases_files/figure-gfm/unnamed-chunk-4-6.png)<!-- -->
@@ -188,7 +188,7 @@ x_plots$`Boxplot of predictions` + ggsci::scale_color_npg()
 ![](test_cases_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
 
 ``` r
-x_plots$`Numbers needed for true positive` + ggsci::scale_color_npg()
+x_plots$`Number needed for true positive` + ggsci::scale_color_npg()
 ## Scale for colour is already present.
 ## Adding another scale for colour, which will replace the existing scale.
 ```
@@ -196,7 +196,7 @@ x_plots$`Numbers needed for true positive` + ggsci::scale_color_npg()
 ![](test_cases_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
 
 ``` r
-x_plots$`Numbers needed for true negative` + ggsci::scale_color_npg()
+x_plots$`Number needed for true negative` + ggsci::scale_color_npg()
 ## Scale for colour is already present.
 ## Adding another scale for colour, which will replace the existing scale.
 ```
@@ -295,7 +295,7 @@ x_plots2$`Boxplot of predictions`
 ![](test_cases_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
 
 ``` r
-x_plots2$`Numbers needed for true positive`
+x_plots2$`Number needed for true positive`
 ## Warning: Removed 1 row containing missing values or values outside the scale range
 ## (`geom_line()`).
 ## Warning: Removed 1 row containing missing values or values outside the scale range
@@ -305,7 +305,7 @@ x_plots2$`Numbers needed for true positive`
 ![](test_cases_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
 
 ``` r
-x_plots2$`Numbers needed for true negative`
+x_plots2$`Number needed for true negative`
 ```
 
 ![](test_cases_files/figure-gfm/unnamed-chunk-9-6.png)<!-- -->
@@ -402,7 +402,7 @@ x_plots3$`Boxplot of predictions`
 ![](test_cases_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->
 
 ``` r
-x_plots3$`Numbers needed for true positive`
+x_plots3$`Number needed for true positive`
 ## Warning: Removed 1 row containing missing values or values outside the scale range
 ## (`geom_line()`).
 ## Warning: Removed 1 row containing missing values or values outside the scale range
@@ -412,7 +412,7 @@ x_plots3$`Numbers needed for true positive`
 ![](test_cases_files/figure-gfm/unnamed-chunk-12-5.png)<!-- -->
 
 ``` r
-x_plots3$`Numbers needed for true negative`
+x_plots3$`Number needed for true negative`
 ```
 
 ![](test_cases_files/figure-gfm/unnamed-chunk-12-6.png)<!-- -->

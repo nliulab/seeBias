@@ -147,13 +147,13 @@ x_plots$`Boxplot of predictions`
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
-x_plots$`Numbers needed for true positive`
+x_plots$`Number needed for true positive`
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
-x_plots$`Numbers needed for true negative`
+x_plots$`Number needed for true negative`
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->

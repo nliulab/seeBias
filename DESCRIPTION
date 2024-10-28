@@ -1,7 +1,7 @@
 Package: seeBias
 Type: Package
 Title: Visual Assessment of Prediction Bias
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Yilin", "Ning", role = c("aut","cre"), comment = c(ORCID = "0000-0002-6758-4472"),
                     email= "yilin.ning@duke-nus.edu.sg"),
              person("Yian", "Ma", role = c("aut"), 

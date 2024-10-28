@@ -52,8 +52,8 @@ x_plots$`ROC curves`
 x_plots$`Calibration in the large`
 x_plots$`Calibration curves`
 x_plots$`Boxplot of predictions`
-x_plots$`Numbers needed for true positive`
-x_plots$`Numbers needed for true negative`
+x_plots$`Number needed for true positive`
+x_plots$`Number needed for true negative`
 ```
 
 User define color scheme:
@@ -67,8 +67,8 @@ x_plots$`ROC curves` + ggsci::scale_color_npg()
 x_plots$`Calibration in the large` + ggsci::scale_fill_npg()
 x_plots$`Calibration curves` + ggsci::scale_color_npg()
 x_plots$`Boxplot of predictions` + ggsci::scale_color_npg()
-x_plots$`Numbers needed for true positive` + ggsci::scale_color_npg()
-x_plots$`Numbers needed for true negative` + ggsci::scale_color_npg()
+x_plots$`Number needed for true positive` + ggsci::scale_color_npg()
+x_plots$`Number needed for true negative` + ggsci::scale_color_npg()
 ```
 
 ## Multiple sensitive variables
@@ -93,8 +93,8 @@ x_plots2$`ROC curves`
 x_plots2$`Calibration in the large`
 x_plots2$`Calibration curves`
 x_plots2$`Boxplot of predictions`
-x_plots2$`Numbers needed for true positive`
-x_plots2$`Numbers needed for true negative`
+x_plots2$`Number needed for true positive`
+x_plots2$`Number needed for true negative`
 ```
 
 ## Specify predicted scores
@@ -119,6 +119,6 @@ x_plots3$`ROC curves`
 x_plots3$`Calibration in the large`
 x_plots3$`Calibration curves`
 x_plots3$`Boxplot of predictions`
-x_plots3$`Numbers needed for true positive`
-x_plots3$`Numbers needed for true negative`
+x_plots3$`Number needed for true positive`
+x_plots3$`Number needed for true negative`
 ```
