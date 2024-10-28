@@ -151,7 +151,8 @@ plot_calib_large <- function(x) {
           legend.position = "right",
           legend.box = "vertical",
           legend.key.width = unit(0.5, "line"),
-          legend.key.height = unit(0.5, "line")) +
+          legend.key.height = unit(0.5, "line"),
+          legend.key.spacing.y = unit(0.5, "line")) +
     guides(fill = guide_legend(ncol = 1))
 }
 
@@ -161,9 +162,10 @@ plot_calib_large <- function(x) {
 #' @importFrom rlang .data
 #' @importFrom stats as.formula coef lm
 plot_calibration <- function(x, print_statistics) {
+  df_calib <- x$performance_evaluation$df_calib
+  if (is.null(df_calib)) return(NULL)
   f_scale_color <- select_scale(x = x, type = "color")
   f_fill_color <- select_scale(x = x, type = "fill")
-  df_calib <- x$performance_evaluation$df_calib
 
   if (print_statistics) {
     calib_slope <- unlist(lapply(levels(df_calib$group), function(g) {
@@ -190,11 +192,16 @@ plot_calibration <- function(x, print_statistics) {
     geom_abline(intercept = 0, slope = 1, lty = 2) +
     geom_point() +
     geom_line() +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 1)) +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 1),
+                       breaks = seq(from = 0.15, to = 0.95, by = 0.1),
+                       minor_breaks = seq(from = 0.1, to = 0.9, by = 0.1)) +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1)) +
-    labs(x = "Predicted probability midpoint", y = "Observed probability",
-         title = "Calibration curves",
-         subtitle = "Expect curves close to diagonal & slope close to 1") +
+    labs(x = sprintf(
+      "Predicted probability midpoint\nPredicted probability ranged from %.3f to %.3f",
+      min(x$input$data$y_pred_prob), max(x$input$data$y_pred_prob)
+    ), y = "Observed probability",
+    title = "Calibration curves",
+    subtitle = "Expect curves close to diagonal & slope close to 1") +
     f_scale_color(name = legend_title) +
     f_fill_color() +
     theme_bw() +
@@ -231,7 +238,7 @@ plot_score <- function(x) {
   ggplot(data = df,
          aes(y = .data$y_group, x = .data$y_pred, color = .data$Group,
              lty = .data$Label)) +
-    geom_boxplot() +
+    geom_boxplot(position = position_dodge(width = 0.8), width = 0.6) +
     labs(x = labs_x, y = "", title = labs_title) +
     f_scale_color() +
     theme_bw() +
