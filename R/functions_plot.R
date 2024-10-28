@@ -46,7 +46,8 @@ plot_metrics <- function(x) {
     labs(y = NULL, x = "Performance metrics",
          title = sprintf("Performance-based fairness (threshold=%.2f)",
                          x$y_pred_threshold),
-         subtitle = "Expect metrics within green range (80% rule)") +
+         subtitle = "Green shading: 0.8-1.25 times the reference level") +
+         # subtitle = "Expect metrics within green range (80% rule)") +
     theme_bw() +
     geom_tile(data = df_ref,
               mapping = aes(x = (.data$x_lower + .data$x_upper) / 2,
@@ -134,7 +135,8 @@ plot_calib_large <- function(x) {
     scale_y_continuous(breaks = NULL, labels = NULL) +
     labs(y = "", x = "Proportion of positive label",
          title = "Calibration in the large",
-         subtitle = "Expect prediction close to observation (black boxes)") +
+         subtitle = "Black boxes: observed proportion (with 95% CI) in each group") +
+         # subtitle = "Expect prediction close to observation (black boxes)") +
     theme_bw() +
     geom_tile(aes(x = .data$p_pred / 2, width = .data$p_pred,
                   fill = .data$group),
@@ -193,15 +195,18 @@ plot_calibration <- function(x, print_statistics) {
     geom_point() +
     geom_line() +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 1),
-                       breaks = seq(from = 0.15, to = 0.95, by = 0.1),
-                       minor_breaks = seq(from = 0.1, to = 0.9, by = 0.1)) +
+                       breaks = seq(from = 0.1, to = 0.9, by = 0.1)) +
+    # scale_x_continuous(expand = c(0, 0), limits = c(0, 1),
+    #                    breaks = seq(from = 0.15, to = 0.95, by = 0.1),
+    #                    minor_breaks = seq(from = 0.1, to = 0.9, by = 0.1)) +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1)) +
     labs(x = sprintf(
       "Predicted probability midpoint\nPredicted probability ranged from %.3f to %.3f",
       min(x$input$data$y_pred_prob), max(x$input$data$y_pred_prob)
     ), y = "Observed probability",
     title = "Calibration curves",
-    subtitle = "Expect curves close to diagonal & slope close to 1") +
+    subtitle = "") +
+    # subtitle = "Expect curves close to diagonal & slope close to 1") +
     f_scale_color(name = legend_title) +
     f_fill_color() +
     theme_bw() +
