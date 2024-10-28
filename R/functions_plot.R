@@ -46,7 +46,8 @@ plot_metrics <- function(x) {
     labs(y = NULL, x = "Performance metrics",
          title = sprintf("Performance-based fairness (threshold=%.2f)",
                          x$y_pred_threshold),
-         subtitle = "Expect metrics within green range (80% rule)") +
+         subtitle = "Green shading: 0.8-1.25 times the reference level") +
+         # subtitle = "Expect metrics within green range (80% rule)") +
     theme_bw() +
     geom_tile(data = df_ref,
               mapping = aes(x = (.data$x_lower + .data$x_upper) / 2,
@@ -91,7 +92,7 @@ plot_roc <- function(x, print_statistics) {
     legend_title <- "AUC (95% CI)"
   } else {
     auc_text_labels <- levels(df_auc$group)
-    legend_title <- NULL
+    legend_title <- "Group"
   }
 
   df_roc$`AUC (95% CI)` <- factor(df_roc$group, levels = levels(df_roc$group),
@@ -134,7 +135,8 @@ plot_calib_large <- function(x) {
     scale_y_continuous(breaks = NULL, labels = NULL) +
     labs(y = "", x = "Proportion of positive label",
          title = "Calibration in the large",
-         subtitle = "Expect prediction close to observation (black boxes)") +
+         subtitle = "Black boxes: observed proportion (with 95% CI) in each group") +
+         # subtitle = "Expect prediction close to observation (black boxes)") +
     theme_bw() +
     geom_tile(aes(x = .data$p_pred / 2, width = .data$p_pred,
                   fill = .data$group),
@@ -179,13 +181,17 @@ plot_calibration <- function(x, print_statistics) {
     legend_title <- "Calibration slope"
   } else {
     calib_slope_text <- levels(df_calib$group)
-    legend_title <- NULL
+    legend_title <- "Group"
   }
 
   df_calib$`Calibration slope` <- factor(
     df_calib$group, levels = levels(df_calib$group), labels = calib_slope_text
   )
 
+  subtitle <- NULL
+  if (x$input$type == "score") {
+    subtitle <- "Probabilities converted from scores using\nlogistic regression on observed labels (Platt scaling)"
+  }
   ggplot(df_calib,
          aes(x = .data$predicted_midpoint, y = .data$event_rate,
              color = .data$`Calibration slope`)) +
@@ -193,15 +199,17 @@ plot_calibration <- function(x, print_statistics) {
     geom_point() +
     geom_line() +
     scale_x_continuous(expand = c(0, 0), limits = c(0, 1),
-                       breaks = seq(from = 0.15, to = 0.95, by = 0.1),
-                       minor_breaks = seq(from = 0.1, to = 0.9, by = 0.1)) +
+                       breaks = seq(from = 0, to = 1, by = 0.1)) +
+    # scale_x_continuous(expand = c(0, 0), limits = c(0, 1),
+    #                    breaks = seq(from = 0.15, to = 0.95, by = 0.1),
+    #                    minor_breaks = seq(from = 0.1, to = 0.9, by = 0.1)) +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1)) +
     labs(x = sprintf(
       "Predicted probability midpoint\nPredicted probability ranged from %.3f to %.3f",
       min(x$input$data$y_pred_prob), max(x$input$data$y_pred_prob)
     ), y = "Observed probability",
-    title = "Calibration curves",
-    subtitle = "Expect curves close to diagonal & slope close to 1") +
+    title = "Calibration curves", subtitle = subtitle) +
+    # subtitle = "Expect curves close to diagonal & slope close to 1") +
     f_scale_color(name = legend_title) +
     f_fill_color() +
     theme_bw() +
@@ -281,7 +289,8 @@ plot_metrics_group <- function(x) {
 
   # PPV Plot
   p_ppv <- ggplot(df_metrics_group,
-                  aes(x = .data$threshold, y = 1 / .data$PPV, color = .data$group)) +
+                  aes(x = .data$threshold, y = 1 / .data$PPV,
+                      color = .data$group)) +
     geom_line(linewidth = 1) +
     geom_point() +
     labs(title = "Numbers needed for true positive",
@@ -294,7 +303,8 @@ plot_metrics_group <- function(x) {
 
   # NPV Plot
   p_npv <- ggplot(df_metrics_group,
-                  aes(x = .data$threshold, y = 1 / .data$NPV, color = .data$group)) +
+                  aes(x = .data$threshold, y = 1 / .data$NPV,
+                      color = .data$group)) +
     geom_line(linewidth = 1) +
     geom_point() +
     labs(title = "Numbers needed for true negative",
