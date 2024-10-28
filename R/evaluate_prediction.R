@@ -219,8 +219,8 @@ plot.seeBias <- function(x, print_statistics = TRUE, y = NULL, ...) {
     `Calibration in the large` = p_calib_large,
     `Calibration curves` = p_calib,
     `Boxplot of predictions` = p_score,
-    `Numbers needed for true positive` = p_ppv,
-    `Numbers needed for true negative` = p_npv
+    `Number needed for true positive` = p_ppv,
+    `Number needed for true negative` = p_npv
   ))
 }
 #' @describeIn evaluate_prediction_prob

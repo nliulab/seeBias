@@ -73,9 +73,9 @@ x_plots$`Boxplot of predictions`
 ```
 
 ```{r, fig.width=6.5}
-x_plots$`Numbers needed for true positive`
+x_plots$`Number needed for true positive`
 ```
 
 ```{r, fig.width=6.5}
-x_plots$`Numbers needed for true negative`
+x_plots$`Number needed for true negative`
 ```

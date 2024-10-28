@@ -105,7 +105,7 @@ plot_roc <- function(x, print_statistics) {
     scale_x_continuous(expand = c(0, 0), limits = c(0, 1)) +
     scale_y_continuous(expand = c(0, 0), limits = c(0, 1)) +
     labs(x = "1-Specificity", y = "Sensitivity",
-         title = "Receiver operating characteristic curve") +
+         title = "Receiver operating characteristic curves") +
     f_scale_color(name = legend_title) +
     theme_bw() +
     common_theme_small() +
@@ -283,37 +283,42 @@ plot_metrics_group <- function(x) {
     panel.border = element_rect(fill = NA, colour = "black", linewidth = 1),
     plot.margin = margin(t = 0, r = 15, b = 2, l = 2, unit = "pt"),
     legend.position = "right",
-    legend.box = "vertical",
-    legend.title = element_blank()
+    legend.box = "vertical"
   )
 
+  df_metrics_group$y_ppv <- 1 / df_metrics_group$PPV
+  df_metrics_group$y_npv <- 1 / df_metrics_group$NPV
   # PPV Plot
   p_ppv <- ggplot(df_metrics_group,
-                  aes(x = .data$threshold, y = 1 / .data$PPV,
-                      color = .data$group)) +
+                  aes(x = .data$threshold, y = .data$y_ppv, color = .data$group)) +
     geom_line(linewidth = 1) +
     geom_point() +
-    labs(title = "Numbers needed for true positive",
-         x = "Threshold",
-         y = "Number of positive predictions needed") +
+    scale_y_continuous(limits = c(floor(min(df_metrics_group$y_ppv)),
+                                  ceiling(max(df_metrics_group$y_ppv)))) +
+    labs(title = "Number needed for true positive",
+         subtitle = "Average number of positive predictions required per true positive outcome",
+         x = "Prediction threshold",
+         y = "Positive predictions per true positive") +
     f_scale_color() +
     theme_bw() +
     common_theme +
-    guides(color = guide_legend(ncol = 1))
+    guides(color = guide_legend(ncol = 1, title = "Group"))
 
   # NPV Plot
   p_npv <- ggplot(df_metrics_group,
-                  aes(x = .data$threshold, y = 1 / .data$NPV,
-                      color = .data$group)) +
+                  aes(x = .data$threshold, y = .data$y_npv, color = .data$group)) +
     geom_line(linewidth = 1) +
     geom_point() +
-    labs(title = "Numbers needed for true negative",
-         x = "Threshold",
-         y = "Number of negative predictions needed") +
+    scale_y_continuous(limits = c(floor(min(df_metrics_group$y_npv)),
+                                  ceiling(max(df_metrics_group$y_npv)))) +
+    labs(title = "Number needed for true negative",
+         subtitle = "Average number of negative predictions required per true negative outcome",
+         x = "Prediction threshold",
+         y = "Negative predictions per true negative") +
     f_scale_color() +
     theme_bw() +
     common_theme +
-    guides(color = guide_legend(ncol = 1))
+    guides(color = guide_legend(ncol = 1, title = "Group"))
 
   list(p_ppv = p_ppv, p_npv = p_npv)
 }
