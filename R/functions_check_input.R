@@ -69,7 +69,7 @@ check_pred_bin <- function(y_pred, y_pos, y_obs) {
   if (length(unique(y_pred)) != 2) {
     stop(simpleError("Predicted outcome ('y_pred') should be binary."))
   }
-  y_pred <- as.character(y_pred)
+  if (!is.factor(y_pred)) y_pred <- factor(as.character(y_pred))
   if (!y_pos %in% levels(y_pred)) {
     stop(simpleError(sprintf(
       "Positive label ('y_pos'='%s') not found in observed labels ('y_pred'='%s').",
