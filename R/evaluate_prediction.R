@@ -236,6 +236,8 @@ summary.seeBias <- function(object, ...) {
   df_count <- object$input$data %>% group_by(sens_var) %>%
     summarise(`Sample size` = n())
   names(df_count)[1] <- "Group"
+  df_count$Group <- as.character(df_count$Group)
+  df_count$Group[1] <- object$input$sens_var_ref # remove "[Ref]" in group name
   df_metrics <- object$performance_evaluation$df_metrics %>%
     mutate(difference = .data$est -
              .data$est[which(.data$group == levels(.data$group)[1])]) %>%
@@ -268,8 +270,7 @@ summary.seeBias <- function(object, ...) {
     filter(.data$group != levels(.data$group)[1]) %>%
     select(group, ratio, difference)
   names(df_ber) <- c("Group", "BER ratio", "BER difference")
-  df_fairness <- merge(df_count, df_equal_opp, by = "Group")
-  df_fairness <- merge(df_fairness, df_equalised_odds, by = "Group")
+  df_fairness <- merge(df_equal_opp, df_equalised_odds, by = "Group")
   df_fairness <- merge(df_fairness, df_tnr, by = "Group")
   df_fairness <- merge(df_fairness, df_ber, by = "Group")
   vec_concept <- c(
@@ -282,6 +283,7 @@ summary.seeBias <- function(object, ...) {
   )
   obj_summ <- list(fairness_metrics = df_fairness,
                    fairness_metrics_concept = vec_concept,
+                   count = df_count,
                    sens_var_ref = object$input$sens_var_ref)
   class(obj_summ) <- "summary.seeBias"
   print.summary.seeBias(obj_summ)
@@ -306,24 +308,30 @@ print.summary.seeBias <- function(object, ..., digits = 3,
   names_diff <- paste(metric_names, "difference")
   names_ratio <- paste(metric_names, "ratio")
   if (metric_type == "difference") {
-    df_fairness <- df_fairness[, c("Group", "Sample size", names_diff)]
+    df_fairness <- df_fairness[, c("Group", names_diff)]
     vec_concept <- object$fairness_metrics_concept[c(2, 4, 6)]
   } else if (metric_type == "ratio") {
-    df_fairness <- df_fairness[, c("Group", "Sample size", names_ratio)]
+    df_fairness <- df_fairness[, c("Group", names_ratio)]
     vec_concept <- object$fairness_metrics_concept[c(1, 3, 5)]
   } else {
     df_fairness <- df_fairness
     vec_concept <- object$fairness_metrics_concept
   }
+  # Now does not have reference group
   df_fairness_print <- df_fairness
-  i_exclude <- 1:2 # exclude sensitive variables and sample sizes below
+  i_exclude <- 1 # exclude sensitive variables column when rounding
   df_fairness_print[, -i_exclude] <- round(df_fairness[, -i_exclude],
                                            digits = digits)
+  # Create a row for reference level with "Reference" for all metrics
   df_fairness_ref <- df_fairness[1, ]
   df_fairness_ref$Group <- object$sens_var_ref
   df_fairness_ref[, -i_exclude] <- "Reference"
-  print(knitr::kable(rbind(df_fairness_ref, df_fairness_print),
-                     digits = digits, row.names = FALSE))
+  df_fairness_print <- rbind(df_fairness_ref, df_fairness_print)
+  # Now add count to the table
+  df_fairness_print <- merge(object$count, df_fairness_print, by = "Group",
+                             sort = FALSE)
+  # Now display the table
+  print(knitr::kable(df_fairness_print, digits = digits, row.names = FALSE))
   cat("\n")
   # cat("The reference group is", object$sens_var_ref, "\n\n")
   for (v in vec_concept) cat(v, "\n\n")

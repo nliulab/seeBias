@@ -87,7 +87,7 @@ summary(x)
 
 | Group                     | Sample size | TPR difference | FPR difference | TNR difference | BER difference |
 |:--------------------------|------------:|:---------------|:---------------|:---------------|:---------------|
-| Caucasian & Male          |         549 | Reference      | Reference      | Reference      | Reference      |
+| Caucasian & Male          |        1621 | Reference      | Reference      | Reference      | Reference      |
 | African American & Female |         549 | 0.173          | 0.13           | -0.13          | -0.021         |
 | African American & Male   |        2626 | 0.242          | 0.194          | -0.194         | -0.024         |
 | Caucasian & Female        |         482 | -0.096         | -0.026         | 0.026          | 0.035          |
