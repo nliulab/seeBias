@@ -74,8 +74,8 @@ summary(x)
 
 | Group            | Sample size | TPR difference | FPR difference | TNR difference | BER difference |
 |:-----------------|------------:|:---------------|:---------------|:---------------|:---------------|
-| Caucasian        |        3175 | Reference      | Reference      | Reference      | Reference      |
 | African American |        3175 | 0.274          | 0.19           | -0.19          | -0.042         |
+| Caucasian        |        2103 | Reference      | Reference      | Reference      | Reference      |
 | Hispanic         |         509 | -0.01          | -0.036         | 0.036          | -0.013         |
 | Other            |         385 | -0.067         | -0.083         | 0.083          | -0.008         |
 
@@ -239,10 +239,10 @@ summary(x2)
 
 | Group                     | Sample size | TPR difference | FPR difference | TNR difference | BER difference |
 |:--------------------------|------------:|:---------------|:---------------|:---------------|:---------------|
-| Caucasian & Male          |         549 | Reference      | Reference      | Reference      | Reference      |
 | African American & Female |         549 | 0.01           | -0.026         | 0.026          | -0.018         |
 | African American & Male   |        2626 | 0.242          | 0.194          | -0.194         | -0.024         |
 | Caucasian & Female        |         482 | -0.296         | -0.189         | 0.189          | 0.053          |
+| Caucasian & Male          |        1621 | Reference      | Reference      | Reference      | Reference      |
 | Hispanic & Female         |          82 | -0.306         | -0.248         | 0.248          | 0.029          |
 | Hispanic & Male           |         427 | -0.034         | -0.047         | 0.047          | -0.006         |
 | Other & Female            |          62 | -0.323         | -0.266         | 0.266          | 0.028          |
@@ -346,10 +346,10 @@ summary(x3)
 
 | Group                     | Sample size | TPR difference | FPR difference | TNR difference | BER difference |
 |:--------------------------|------------:|:---------------|:---------------|:---------------|:---------------|
-| Caucasian & Male          |         549 | Reference      | Reference      | Reference      | Reference      |
 | African American & Female |         549 | 0.01           | -0.026         | 0.026          | -0.018         |
 | African American & Male   |        2626 | 0.242          | 0.194          | -0.194         | -0.024         |
 | Caucasian & Female        |         482 | -0.296         | -0.189         | 0.189          | 0.053          |
+| Caucasian & Male          |        1621 | Reference      | Reference      | Reference      | Reference      |
 | Hispanic & Female         |          82 | -0.306         | -0.248         | 0.248          | 0.029          |
 | Hispanic & Male           |         427 | -0.034         | -0.047         | 0.047          | -0.006         |
 | Other & Female            |          62 | -0.323         | -0.266         | 0.266          | 0.028          |
