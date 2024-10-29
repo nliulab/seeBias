@@ -227,12 +227,15 @@ plot.seeBias <- function(x, print_statistics = TRUE, y = NULL, ...) {
 #' Plot model performance metrics for fairness evaluation
 #' @param object \code{seeBias} object
 #' @param ... Not supported.
-#' @importFrom dplyr mutate filter select group_by summarise
+#' @importFrom dplyr mutate filter select group_by summarise n
 #' @importFrom tidyr pivot_wider
 #' @importFrom rlang .data
 #' @importFrom magrittr %>%
 #' @export
 summary.seeBias <- function(object, ...) {
+  df_count <- object$input$data %>% group_by(sens_var) %>%
+    summarise(`Sample size` = n())
+  names(df_count)[1] <- "Group"
   df_metrics <- object$performance_evaluation$df_metrics %>%
     mutate(difference = .data$est -
              .data$est[which(.data$group == levels(.data$group)[1])]) %>%
@@ -265,7 +268,8 @@ summary.seeBias <- function(object, ...) {
     filter(.data$group != levels(.data$group)[1]) %>%
     select(group, ratio, difference)
   names(df_ber) <- c("Group", "BER ratio", "BER difference")
-  df_fairness <- merge(df_equal_opp, df_equalised_odds, by = "Group")
+  df_fairness <- merge(df_count, df_equal_opp, by = "Group")
+  df_fairness <- merge(df_fairness, df_equalised_odds, by = "Group")
   df_fairness <- merge(df_fairness, df_tnr, by = "Group")
   df_fairness <- merge(df_fairness, df_ber, by = "Group")
   vec_concept <- c(
@@ -300,24 +304,24 @@ print.summary.seeBias <- function(object, ..., digits = 3,
   # metric_names <- c("Equal opportunity", "Equalised odds", "BER equality")
   metric_names <- c("TPR", "FPR", "TNR", "BER")
   names_diff <- paste(metric_names, "difference")
-  cols_diff <- which(names(df_fairness) %in% names_diff)
   names_ratio <- paste(metric_names, "ratio")
-  cols_ratio <- which(names(df_fairness) %in% names_ratio)
   if (metric_type == "difference") {
-    df_fairness <- df_fairness[, c("Group", names_diff)]
-    vec_concept <- object$fairness_metrics_concept[cols_diff[-4] - 1]
+    df_fairness <- df_fairness[, c("Group", "Sample size", names_diff)]
+    vec_concept <- object$fairness_metrics_concept[c(2, 4, 6)]
   } else if (metric_type == "ratio") {
-    df_fairness <- df_fairness[, c("Group", names_ratio)]
-    vec_concept <- object$fairness_metrics_concept[cols_ratio[-4] - 1]
+    df_fairness <- df_fairness[, c("Group", "Sample size", names_ratio)]
+    vec_concept <- object$fairness_metrics_concept[c(1, 3, 5)]
   } else {
     df_fairness <- df_fairness
     vec_concept <- object$fairness_metrics_concept
   }
   df_fairness_print <- df_fairness
-  df_fairness_print[, -1] <- round(df_fairness[, -1], digits = digits)
+  i_exclude <- 1:2 # exclude sensitive variables and sample sizes below
+  df_fairness_print[, -i_exclude] <- round(df_fairness[, -i_exclude],
+                                           digits = digits)
   df_fairness_ref <- df_fairness[1, ]
   df_fairness_ref$Group <- object$sens_var_ref
-  df_fairness_ref[, -1] <- "Reference"
+  df_fairness_ref[, -i_exclude] <- "Reference"
   print(knitr::kable(rbind(df_fairness_ref, df_fairness_print),
                      digits = digits, row.names = FALSE))
   cat("\n")

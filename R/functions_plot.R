@@ -296,7 +296,7 @@ plot_metrics_group <- function(x) {
     scale_y_continuous(limits = c(floor(min(df_metrics_group$y_ppv)),
                                   ceiling(max(df_metrics_group$y_ppv)))) +
     labs(title = "Number needed for true positive",
-         subtitle = "Average number of positive predictions required per true positive outcome",
+         subtitle = "Average number of positive predictions required\nper true positive outcome",
          x = "Prediction threshold",
          y = "Positive predictions per true positive") +
     f_scale_color() +
@@ -312,7 +312,7 @@ plot_metrics_group <- function(x) {
     scale_y_continuous(limits = c(floor(min(df_metrics_group$y_npv)),
                                   ceiling(max(df_metrics_group$y_npv)))) +
     labs(title = "Number needed for true negative",
-         subtitle = "Average number of negative predictions required per true negative outcome",
+         subtitle = "Average number of negative predictions required\nper true negative outcome",
          x = "Prediction threshold",
          y = "Negative predictions per true negative") +
     f_scale_color() +
