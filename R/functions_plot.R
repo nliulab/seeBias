@@ -2,7 +2,7 @@
 #' @importFrom ggplot2 theme element_text element_blank element_rect margin
 common_theme_small <- function() {
   theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-        plot.subtitle = element_text(size = 11),
+        plot.subtitle = element_text(size = 12),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 12),
         strip.text.x = element_text(size = 12),
@@ -41,12 +41,12 @@ plot_metrics <- function(x) {
     scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.2)) +
     scale_y_continuous(breaks = df_metrics$y, labels = df_metrics$group,
                        position = "left",
-                       sec.axis = sec_axis(trans = ~ ., breaks = 1:m,
+                       sec.axis = sec_axis(transform = ~ ., breaks = 1:m,
                                            labels = levels(df_metrics$metric))) +
     labs(y = NULL, x = "Performance metrics",
-         title = sprintf("Performance-based fairness (threshold=%.2f)",
-                         x$y_pred_threshold),
-         subtitle = "Green shading: 0.8-1.25 times the reference level") +
+         # title = sprintf("Performance-based fairness (threshold=%.2f)",
+         #                 x$y_pred_threshold),
+         subtitle = sprintf("Performance evaluated at threshold=%.2f\nGreen shading: 0.8-1.25 times the reference level", x$input$y_pred_threshold)) +
          # subtitle = "Expect metrics within green range (80% rule)") +
     theme_bw() +
     geom_tile(data = df_ref,
@@ -64,8 +64,7 @@ plot_metrics <- function(x) {
           axis.text = element_text(size = 12),
           axis.title = element_text(size = 12),
           legend.position = "none",
-          plot.title = element_text(size = 14, face = "bold"),
-          plot.subtitle = element_text(size = 11),
+          plot.subtitle = element_text(size = 12),
           panel.border = element_rect(fill = NA, colour = "black", size = 1),
           panel.grid.major.y = element_blank(),
           panel.grid.minor.y = element_blank(),
@@ -112,7 +111,8 @@ plot_roc <- function(x, print_statistics) {
     theme(legend.background = element_rect(fill = NA),
           legend.position = "right",
           legend.box = "vertical",
-          legend.key.width = unit(1, "line")) +
+          legend.key.width = unit(1, "lines"),
+          legend.key.spacing.y = unit(0.1, "lines")) +
     guides(color = guide_legend(ncol = 1))
 }
 
@@ -135,7 +135,7 @@ plot_calib_large <- function(x) {
     scale_y_continuous(breaks = NULL, labels = NULL) +
     labs(y = "", x = "Proportion of positive label",
          title = "Calibration in the large",
-         subtitle = "Black boxes: observed proportion (with 95% CI) in each group") +
+         subtitle = "Black boxes: observed proportion (with 95% CI)") +
          # subtitle = "Expect prediction close to observation (black boxes)") +
     theme_bw() +
     geom_tile(aes(x = .data$p_pred / 2, width = .data$p_pred,
@@ -152,75 +152,58 @@ plot_calib_large <- function(x) {
     theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
           legend.position = "right",
           legend.box = "vertical",
-          legend.key.width = unit(0.5, "line"),
-          legend.key.height = unit(0.5, "line"),
-          legend.key.spacing.y = unit(0.5, "line")) +
+          legend.key.width = unit(0.5, "lines"),
+          legend.key.height = unit(0.5, "lines"),
+          legend.key.spacing.y = unit(0.5, "lines")) +
     guides(fill = guide_legend(ncol = 1))
 }
-
 #' Private function to plot calibration curves
 #' @inheritParams plot_roc
 #' @import ggplot2
 #' @importFrom rlang .data
-#' @importFrom stats as.formula coef lm
-plot_calibration <- function(x, print_statistics) {
-  df_calib <- x$performance_evaluation$df_calib
-  if (is.null(df_calib)) return(NULL)
+#' @importFrom probably cal_plot_logistic
+plot_calibration <- function(x) {
+  if (x$input$type == "bin") return(NULL)
+  df_dat <- x$input$data
+  df_dat$y_obs <- as.numeric(df_dat$y_obs == "1") # needed by cal_plot_logistic
   f_scale_color <- select_scale(x = x, type = "color")
   f_fill_color <- select_scale(x = x, type = "fill")
 
-  if (print_statistics) {
-    calib_slope <- unlist(lapply(levels(df_calib$group), function(g) {
-      m_g <- lm(as.formula("event_rate ~ predicted_midpoint"),
-                data = df_calib[which(df_calib$group == g), ])
-      coef(m_g)[2]
-    }))
-    calib_slope_text <- unlist(lapply(seq_along(calib_slope), function(i) {
-      sprintf("%s: %.2f", levels(df_calib$group)[i], calib_slope[i])
-    }))
-    legend_title <- "Calibration slope"
-  } else {
-    calib_slope_text <- levels(df_calib$group)
-    legend_title <- "Group"
-  }
-
-  df_calib$`Calibration slope` <- factor(
-    df_calib$group, levels = levels(df_calib$group), labels = calib_slope_text
-  )
-
-  subtitle <- NULL
+  subtitle <- NULL # "Calibration via the logistic recalibration framework"
   if (x$input$type == "score") {
     subtitle <- "Probabilities converted from scores using\nlogistic regression on observed labels (Platt scaling)"
+    # subtitle <- paste0(
+    #   subtitle,
+    #   "\nProbabilities converted from scores using\nlogistic regression on observed labels (Platt scaling)"
+    # )
   }
-  ggplot(df_calib,
-         aes(x = .data$predicted_midpoint, y = .data$event_rate,
-             color = .data$`Calibration slope`)) +
+  x$input$data %>%
+    mutate(y_obs = as.numeric(y_obs == 1)) %>%
+    probably::cal_plot_logistic(
+      truth = y_obs, estimate = y_pred_prob, include_ribbon = TRUE, smooth = FALSE,
+      .by = sens_var
+    ) +
+    # Plot all in one panel and remove unnecessary panel strip:
+    facet_wrap(facets = ~ NULL, drop = TRUE) +
     geom_abline(intercept = 0, slope = 1, lty = 2) +
-    geom_point() +
-    geom_line() +
-    scale_x_continuous(expand = c(0, 0), limits = c(0, 1),
-                       breaks = seq(from = 0, to = 1, by = 0.1)) +
-    # scale_x_continuous(expand = c(0, 0), limits = c(0, 1),
-    #                    breaks = seq(from = 0.15, to = 0.95, by = 0.1),
-    #                    minor_breaks = seq(from = 0.1, to = 0.9, by = 0.1)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 1)) +
-    labs(x = sprintf(
-      "Predicted probability midpoint\nPredicted probability ranged from %.3f to %.3f",
-      min(x$input$data$y_pred_prob), max(x$input$data$y_pred_prob)
-    ), y = "Observed probability",
+    coord_cartesian(expand = FALSE) +
+    labs(x = "Predicted probability",
+         y = "Event rate\n(estimated by logistic recalibration)",
     title = "Calibration curves", subtitle = subtitle) +
-    # subtitle = "Expect curves close to diagonal & slope close to 1") +
-    f_scale_color(name = legend_title) +
+    f_scale_color() +
     f_fill_color() +
     theme_bw() +
     common_theme_small() +
     theme(legend.background = element_rect(fill = NA),
           legend.position = "right",
           legend.box = "vertical",
-          legend.key.width = unit(1, "line")) +
-    guides(color = guide_legend(ncol = 1))
+          legend.key.width = unit(1, "lines"),
+          legend.key.spacing.y = unit(0.1, "lines"),
+          strip.background = element_blank(),
+          strip.text.x = element_blank()) +
+    guides(color = guide_legend(ncol = 1, title = "Group"),
+           fill = guide_legend(ncol = 1, title = "Group"))
 }
-
 #' Private function to plot score distributions by label and group
 #' @inheritParams plot.seeBias
 #' @import ggplot2
@@ -250,16 +233,17 @@ plot_score <- function(x) {
     labs(x = labs_x, y = "", title = labs_title) +
     f_scale_color() +
     theme_bw() +
-    seeBias:::common_theme_small() +
+    common_theme_small() +
     theme(legend.position = "right",
           legend.box = "vertical",
-          legend.key.width = unit(0.8, "line"),
-          legend.key.height = unit(0.5, "line"),
+          legend.key.width = unit(0.8, "lines"),
+          legend.key.height = unit(0.5, "lines"),
+          legend.key.spacing.y = unit(0.5, "lines"),
+          legend.spacing.y = unit(0, "lines"), # Space between Group and Label
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
           panel.spacing = unit(0, "cm"),
-          panel.border = element_rect(fill = NA, colour = "black", linewidth = 0.5),
-          legend.key.spacing.y = unit(0.5, "line")) +
+          panel.border = element_rect(fill = NA, colour = "black", linewidth = 0.5)) +
     guides(
       color = guide_legend(ncol = 1, title = "Group"),
       linetype = guide_legend(ncol = 1, title = "Label")
@@ -283,7 +267,8 @@ plot_metrics_group <- function(x) {
     panel.border = element_rect(fill = NA, colour = "black", linewidth = 1),
     plot.margin = margin(t = 0, r = 15, b = 2, l = 2, unit = "pt"),
     legend.position = "right",
-    legend.box = "vertical"
+    legend.box = "vertical",
+    legend.key.spacing.y = unit(0.1, "lines")
   )
 
   df_metrics_group$y_ppv <- 1 / df_metrics_group$PPV

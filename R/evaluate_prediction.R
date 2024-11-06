@@ -46,10 +46,6 @@ evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
   )
   df_roc <- ls_roc$df_roc
   df_auc <- ls_roc$df_auc
-  # Calibration:
-  df_calib <- eval_calib(
-    y_pred = input_pred$y_pred, y_obs = y_obs, sens_var = sens_var
-  )
   # Compile results
   obj <- list(
     input = list(
@@ -69,8 +65,7 @@ evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
       df_metrics = res_metrics$df_metrics,
       df_prob = res_metrics$df_prob,
       df_metrics_group = df_metrics_group,
-      df_roc = df_roc, df_auc = df_auc,
-      df_calib = df_calib
+      df_roc = df_roc, df_auc = df_auc
     )
   )
   class(obj) <- "seeBias"
@@ -114,10 +109,6 @@ evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
   )
   df_roc <- ls_roc$df_roc
   df_auc <- ls_roc$df_auc
-  # Calibration:
-  df_calib <- eval_calib(
-    y_pred = input_pred$y_pred_prob, y_obs = y_obs, sens_var = sens_var
-  )
   # Compile results
   obj <- list(
     input = list(
@@ -137,8 +128,7 @@ evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
       df_metrics = res_metrics$df_metrics,
       df_prob = res_metrics$df_prob,
       df_metrics_group = df_metrics_group,
-      df_roc = df_roc, df_auc = df_auc,
-      df_calib = df_calib
+      df_roc = df_roc, df_auc = df_auc
     )
   )
   class(obj) <- "seeBias"
@@ -209,7 +199,7 @@ plot.seeBias <- function(x, print_statistics = TRUE, y = NULL, ...) {
   p_ppv <- ls_metrics_group$p_ppv
   p_npv <- ls_metrics_group$p_npv
   p_roc <- plot_roc(x = x, print_statistics = print_statistics)
-  p_calib <- plot_calibration(x = x, print_statistics = print_statistics)
+  p_calib <- plot_calibration(x = x)
   p_calib_large <- plot_calib_large(x = x)
   p_score <- plot_score(x = x)
   plot(p_metrics)

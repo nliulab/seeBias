@@ -64,6 +64,10 @@ table(x$input$data$sens_var, x$input$data$y_obs)
 ##   Hispanic          320  189
 ##   Other             248  137
 x_plots <- plot(x)
+## Scale for x is already present.
+## Adding another scale for x, which will replace the existing scale.
+## Scale for y is already present.
+## Adding another scale for y, which will replace the existing scale.
 ```
 
 ![](test_cases_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
@@ -229,6 +233,10 @@ table(x2$input$data$sens_var, x2$input$data$y_obs)
 ##   Other & Female              48   14
 ##   Other & Male               200  123
 x_plots2 <- plot(x2, print_statistics = FALSE)
+## Scale for x is already present.
+## Adding another scale for x, which will replace the existing scale.
+## Scale for y is already present.
+## Adding another scale for y, which will replace the existing scale.
 ```
 
 ![](test_cases_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
@@ -336,6 +344,10 @@ table(x3$input$data$sens_var, x3$input$data$y_obs)
 ##   Other & Female              48   14
 ##   Other & Male               200  123
 x_plots3 <- plot(x3, print_statistics = FALSE)
+## Scale for x is already present.
+## Adding another scale for x, which will replace the existing scale.
+## Scale for y is already present.
+## Adding another scale for y, which will replace the existing scale.
 ```
 
 ![](test_cases_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->

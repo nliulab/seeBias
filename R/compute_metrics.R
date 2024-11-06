@@ -77,29 +77,6 @@ eval_roc <- function(y_pred, y_obs, sens_var) {
   df_auc$group <- configure_group(group = df_auc$group, ref = sens_var_ref)
   list(df_roc = df_roc, df_auc = df_auc)
 }
-#' Compute calibration curves
-#' @inheritParams eval_roc
-#' @param y_pred Processed predicted probability or score.
-#' @importFrom probably cal_plot_breaks
-#' @importFrom magrittr %>%
-#' @importFrom dplyr filter select mutate bind_rows
-#' @importFrom rlang .data
-#' @return Returns a data.frame of data for calibration curves.
-eval_calib <- function(y_pred, y_obs, sens_var) {
-  sens_var_ref <- levels(sens_var)[1]
-  df_calib <- do.call("rbind", lapply(levels(sens_var), function(sens_var_cat) {
-    df_calib <- data.frame(
-      y_obs = as.numeric(y_obs[which(sens_var == sens_var_cat)] == "1"),
-      y_pred = y_pred[which(sens_var == sens_var_cat)]
-    ) %>% probably::cal_plot_breaks(
-      truth = y_obs, estimate = y_pred, num_breaks = 10, include_ribbon = TRUE
-    )
-    df_calib$data$group <- sens_var_cat
-    df_calib$data
-  }))
-  df_calib$group <- configure_group(group = df_calib$group, ref = sens_var_ref)
-  df_calib
-}
 #' Evaluate model performance at different thresholds by group
 #' @param y_pred Processed predicted probabilities or scores.
 #' @param y_obs Processed observed label.

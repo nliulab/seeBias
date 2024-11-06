@@ -4,13 +4,10 @@
 \alias{plot_calibration}
 \title{Private function to plot calibration curves}
 \usage{
-plot_calibration(x, print_statistics)
+plot_calibration(x)
 }
 \arguments{
 \item{x}{\code{seeBias} object}
-
-\item{print_statistics}{Whether to print calibration slope in the plot
-legend.}
 }
 \description{
 Private function to plot calibration curves
