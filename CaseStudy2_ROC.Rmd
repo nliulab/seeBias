@@ -1,0 +1,223 @@
+---
+title: "Case Study 2: Clinical Fairness Evaluation in ROSC Prediction"
+output: 
+  github_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, warning = FALSE, 
+                      fig.width = 5, fig.height = 5)
+```
+
+This guide book completely reproduces Case Study 2 in the paper *seeBias: A
+Comprehensive Tool for Assessing and Visualizing Fairness in AI Prediction
+Models*, which evaluates bias across race groups when predicting return of
+spontaneous circulation (ROSC) among out-of-hospital cardiac arrest (OHCA)
+patients using data from the Resuscitation Outcomes Consortium (ROC) Cardiac
+Epidemiologic Registry (Version 3).
+
+## Build scoring model
+
+The ROC data can be requested from the [NIH website](https://biolincc.nhlbi.nih.gov/studies/roc_cardiac_epistry_3/#:~:text=The%20ROC%20Cardiac%20Epistry%20version,and%20which%20data%20were%20collected). 
+In this code book we focus on the development of a scoring model for ROSC
+prediction and fairness evaluation of the model, using a subset of the original
+ROC data.
+
+```{r}
+library(seeBias)
+library(AutoScore) # to build scoring model
+library(dplyr) # to manipulate data
+library(tableone) # to describe final dataset
+library(knitr) # to format tables
+library(ggplot2) # to edit figures
+library(ggpubr) # to arrange figures
+```
+
+### Prepare data
+
+Load the final cohort prepared from the ROC data. Based on AutoScore
+requirements, ROSC status has been renamed to `label`.
+
+```{r}
+dat <- readRDS("dat_roc.RDS") 
+head(dat)
+# Confirm the data conforms to AutoScore requirements:
+check_data(dat)
+# Generate descriptive table for the final cohort (Supplementary Table S2):
+compute_descriptive_table(dat)
+```
+
+### Build scoring model using AutoScore
+
+Follow the [standard steps of the AutoScore framework](https://nliulab.github.io/AutoScore/) 
+to develop the scoring model. The variable race is only used for fairness
+evaluation, not in the scoring model development.
+
+Split the final cohort into training, validation, and test sets:
+
+```{r}
+set.seed(4)
+out_split <- split_data(data = dat, ratio = c(0.7, 0.1, 0.2), 
+                        strat_by_label = TRUE)
+train_set <- out_split$train_set
+validation_set <- out_split$validation_set
+test_set <- out_split$test_set
+dim(train_set)
+dim(validation_set)
+dim(test_set)
+```
+
+Exclude race from model development, and rank candidate variables using random
+forest (RF):
+
+```{r rank}
+train_set_no_race <- train_set %>% select(-Race)
+set.seed(4)
+ranking <- AutoScore_rank(train_set = train_set_no_race, method = "rf", ntree = 100)
+```
+
+Generate parsimony plot for variable selection:
+
+```{r pars, fig.width=7}
+AUC <- AutoScore_parsimony(
+  train_set = train_set, validation_set = validation_set,
+  rank = ranking, max_score = 100, n_min = 1, n_max = ncol(train_set_no_race) - 1,
+  categorize = "quantile", quantiles = c(0, 0.05, 0.2, 0.8, 0.95, 1),
+  auc_lim_min = 0.5, auc_lim_max = "adaptive"
+)
+```
+
+Customize the parsimony plot with preferred variable names (Supplementary Figure S1):
+
+```{r, fig.width=7}
+x_names <- setdiff(names(train_set_no_race), "label")
+x_names_display <- c(
+  "Age", "Sex", "Cardiac cause", "Witnessed", "BCPR provider", "Location", 
+  "Initial rhythm", "EMS response time", "Use of any medication", 
+  "Use of epinephrine", "Use of amiodarone", "Mechanical CPR"
+)
+auc_names_display <- x_names_display[match(x = names(AUC), table = x_names)]
+p_auc <- data.frame(
+  AUC = AUC, 
+  variables = factor(auc_names_display, levels = auc_names_display), 
+  num = seq_along(AUC)
+) %>% ggplot(aes(x = variables, y = AUC)) + 
+  geom_bar(stat = "identity", fill = "steelblue") + 
+  coord_cartesian(ylim = c(0.5, max(AUC))) + 
+  theme_bw() + 
+  labs(x = "", y = "Mean Area Under the Curve", 
+       title = "Parsimony plot on the validation set") + 
+  theme(legend.position = "none", axis.text = element_text(size = 12), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + 
+  geom_text(aes(label = num), vjust = 1.5, colour = "white")
+p_auc
+ggsave("output/roc_auc.pdf", width = 6, height = 5)
+```
+
+Build the final scoring model with the top 6 variables in the parsimony plot,
+and fine-tune the cutoff values for continuous variables selected:
+
+```{r}
+final_variables <- names(ranking[1:6])
+cut_vec <- AutoScore_weighting( 
+  train_set = train_set, validation_set = validation_set,
+  final_variables = final_variables, max_score = 100,
+  categorize = "quantile", quantiles = c(0, 0.05, 0.2, 0.8, 0.95, 1)
+)
+cut_vec$Response_time <- c(4, 8, 12)
+cut_vec$Age <- c(35)
+
+scoring_table <- AutoScore_fine_tuning(
+  train_set = train_set, validation_set = validation_set, 
+  final_variables = final_variables, cut_vec = cut_vec, max_score = 100
+)
+```
+
+Generate predicted scores for the test set for fairness evaluation:
+
+```{r}
+pred_score <- AutoScore_testing(
+  test_set = test_set, final_variables = final_variables, cut_vec = cut_vec,
+  scoring_table = scoring_table, threshold = "best", with_label = TRUE
+)
+head(pred_score)
+```
+
+## Fairness evaluation
+
+Construct the seeBias object, using race as the sensitive variable.
+
+```{r}
+# Extracted predicted scores and observations from AutoScore output.
+# If not specified, the best threshold in ROC analysis is used.
+x_score <- evaluate_prediction_score(
+  y_pred = pred_score$pred_score, 
+  y_obs = pred_score$Label,
+  sens_var = test_set$Race, sens_var_ref = "White"
+)
+```
+
+### Compute fairness metrics
+
+Table 2 in the manuscript:
+
+```{r results='asis'}
+summary(x_score)
+```
+
+### Visualise fairness metrics
+
+By default, only the figure for performance metrics (Figure 4) is displayed.
+
+```{r, fig.width = 10, fig.height = 6}
+x_plots_score <- plot(x = x_score)
+```
+
+To save the figure for performance metrics to a PDF file:
+
+```{r}
+ggsave(x_plots_score$`Performance metrics`, filename = "output/roc_metrics.pdf", 
+       width = 20, height = 12, units = "cm")
+```
+
+To format and compile other figures (Figure 5), and save to a PDF file:
+
+```{r, fig.width=10, fig.height=14}
+common_theme <- theme(legend.position = "bottom", 
+                      legend.box.spacing = unit(0, "lines"))
+p_roc <- x_plots_score$`ROC curves` + common_theme + 
+  guides(
+    color = guide_legend(ncol = 2, title = "Group")
+  )
+p_calib <- x_plots_score$`Calibration curves` + common_theme + 
+  guides(
+    color = guide_legend(ncol = 2, title = "Group")
+  )
+p_calib_large <- x_plots_score$`Calibration in the large` + common_theme + 
+  guides(
+    fill = guide_legend(ncol = 3, title = "Group")
+  )
+p_score <- x_plots_score$`Boxplot of predictions` + common_theme + 
+  guides(
+    color = guide_legend(ncol = 3, title = "Group"),
+    linetype = guide_legend(ncol = 2, title = "Label")
+  )
+p_nnp <- x_plots_score$`Number needed for true positive` + common_theme + 
+  guides(
+    color = guide_legend(ncol = 3, title = "Group")
+  )
+p_nnn <- x_plots_score$`Number needed for true negative` + common_theme + 
+  guides(
+    color = guide_legend(ncol = 3, title = "Group")
+  )
+p_all <- ggarrange(
+  p_roc, p_calib, p_calib_large, p_score, p_nnp, p_nnn,
+  labels = LETTERS[1:6], font.label = list(size = 14, face = "bold"),
+  ncol = 2, nrow = 3,
+  heights = c(5.8, 3.8, 4.4)
+)
+p_all
+ggsave(p_all, filename = "output/roc_other_fairness.pdf", 
+       width = 26.25, height = 32.5, units = "cm")
+```

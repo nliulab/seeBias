@@ -1,0 +1,142 @@
+---
+title: "Case Study 1: Intersectional Bias in Recidivism Prediction"
+output: 
+  github_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, cache = FALSE,
+                      fig.height = 4)
+```
+
+This guide book completely reproduces Case Study 1 in the paper *seeBias: A
+Comprehensive Tool for Assessing and Visualizing Fairness in AI Prediction
+Models*, which evaluates bias across race and sex when predicting two-year
+recidivism using the COMPAS data.
+
+## Build prediction model
+
+The COMPAS data is sourced from the [*fairmodels*](https://fairmodels.drwhy.ai/)
+R package and also provided in the *seeBias* package.
+
+```{r}
+library(seeBias)
+library(dplyr) # to manipulate data
+library(tableone) # to describe final dataset
+library(knitr) # to format tables
+library(ggplot2) # to edit figures
+library(ggpubr) # to arrange figures
+data("compas")
+knitr::kable(head(compas))
+```
+
+### Prepare data
+
+Use subset of COMPAS data for White and Black individuals. Exclude race and 
+sex from the prediction model.
+
+```{r}
+dat <- compas %>% filter(Ethnicity %in% c("Caucasian", "African_American"))
+dat$Ethnicity <- ifelse(dat$Ethnicity == "African_American", "Black", "White")
+```
+
+The COMPAS dataset includes `r nrow(compas)` individuals. We focused on a subset
+of `r nrow(dat)` White and Black individuals and examined bias across race
+(`Ethnicity`) and sex (`Sex`).
+
+```{r}
+CreateTableOne(vars = names(dat), strata = "Two_yr_Recidivism", 
+               data = dat, addOverall = TRUE) %>% 
+  kableone(caption = "Supplementary Table S1. Characteristics of individuals analyzed in the prediction of two-year recidivism.")
+```
+
+### Build logistic regression model
+
+In this example, all subjects in the final dataset are used for model training
+and evaluation.
+
+```{r,message=FALSE}
+m <- dat %>% select(-Ethnicity, -Sex) %>% 
+  glm(Two_yr_Recidivism ~ ., data = ., family = "binomial")
+kable(
+  cbind(exp(coef(m)), exp(confint(m))), digits = 2, 
+  col.names = c("OR", "95% CI (lower bound)", "95% CI (upper bound)"), 
+  caption = "Odds ratio (OR) and 95% confidence interval (CI) from the logistic regression model."
+)
+```
+
+## Fairness evaluation
+
+Construct the seeBias object, using race and gender as sensitive variables.
+
+```{r}
+# Extracted predicted risk and observations from test data.
+# If not specified, the best threshold in ROC analysis is used.
+x <- dat %>% select(Ethnicity, Sex) %>% evaluate_prediction_prob(
+  y_pred = predict(m, newdata = dat, type = "response"), 
+  y_obs = dat$Two_yr_Recidivism, y_pos = "1",
+  sens_var = ., sens_var_ref = c("White", "Male")
+)
+```
+
+### Compute fairness metrics
+
+Table 1 in the manuscript:
+
+```{r results='asis'}
+summary(x)
+```
+
+### Visualise fairness metrics
+
+By default, only the figure for performance metrics (Figure 2) is displayed.
+
+```{r, fig.width = 10, fig.height = 6}
+x_plots <- plot(x)
+```
+
+To save the figure for performance metrics to a PDF file:
+
+```{r}
+ggsave(x_plots$`Performance metrics`, filename = "output/compas_metrics.pdf", 
+       width = 20, height = 12, units = "cm")
+```
+
+To format and compile other figures (Figure 3), and save to a PDF file:
+
+```{r, fig.width=10, fig.height=13}
+common_theme <- theme(legend.position = "bottom", 
+                      legend.box.spacing = unit(0, "lines"))
+p_roc <- x_plots$`ROC curves` + common_theme + 
+  theme(axis.title.y = element_text(margin = margin(0, 5, 0, 0)))
+p_calib <- x_plots$`Calibration curves` + common_theme
+p_calib_large <- x_plots$`Calibration in the large` + common_theme +
+  guides(
+    fill = guide_legend(ncol = 2, title = "Group")
+  )
+p_score <- x_plots$`Boxplot of predictions` + common_theme + 
+  guides(
+    color = guide_legend(ncol = 2, title = "Group"),
+    linetype = guide_legend(ncol = 2, title = "Label")
+  )
+p_nnp <- x_plots$`Number needed for true positive` + common_theme + 
+  theme(axis.title.y = element_text(margin = margin(0, 5, 0, 0))) + 
+  guides(
+    color = guide_legend(ncol = 2, title = "Group")
+  )
+p_nnn <- x_plots$`Number needed for true negative` + common_theme + 
+  theme(axis.title.y = element_text(margin = margin(0, 5, 0, 0))) + 
+  guides(
+    color = guide_legend(ncol = 2, title = "Group")
+  )
+p_all <- ggarrange(
+  p_roc, p_calib, p_calib_large, p_score, p_nnp, p_nnn,
+  labels = LETTERS[1:6], font.label = list(size = 14, face = "bold"),
+  ncol = 2, nrow = 3,
+  heights = c(6, 3.5, 4.5)#, align = "v"
+)
+p_all
+ggsave(p_all, filename = "output/compas_other_fairness.pdf", 
+       width = 23, height = 29.9, units = "cm")
+```
