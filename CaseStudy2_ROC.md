@@ -49,7 +49,7 @@ Load the final cohort prepared from the ROC data. Based on AutoScore
 requirements, ROSC status has been renamed to `label`.
 
 ``` r
-dat <- readRDS("dat_roc.RDS") 
+dat <- readRDS("dat_roc.RDS")
 head(dat)
 ##   label Age    Sex   Race Cardiac_cause Witnessed   BCPR_by   Location
 ## 1     0  89   Male Others             1        No   Unknown    Private
@@ -70,7 +70,10 @@ check_data(dat)
 ## Data type check passed.
 ## No NA in data.
 # Generate descriptive table for the final cohort (Supplementary Table S2):
-compute_descriptive_table(dat)
+dat %>%
+  mutate(Any_drug = factor(Any_drug), Epinephrine = factor(Epinephrine), 
+         Amiodarone = factor(Amiodarone), Mechanic_CPR = factor(Mechanic_CPR)) %>%
+  compute_descriptive_table()
 ```
 
 |                           | Overall       | 0             | 1             | p       | test |
@@ -101,10 +104,10 @@ compute_descriptive_table(dat)
 | Unknown                   | 4519 ( 7.7)   | 2436 ( 7.1)   | 2083 ( 8.5)   |         |      |
 | VF/VT                     | 13298 (22.7)  | 5120 (14.9)   | 8178 ( 33.5)  |         |      |
 | Response_time (mean (SD)) | 6.16 (3.44)   | 6.22 (3.49)   | 6.09 (3.36)   | \<0.001 |      |
-| Any_drug (mean (SD))      | 0.86 (0.34)   | 0.87 (0.33)   | 0.85 (0.36)   | \<0.001 |      |
-| Epinephrine (mean (SD))   | 0.83 (0.37)   | 0.87 (0.33)   | 0.78 (0.42)   | \<0.001 |      |
-| Amiodarone (mean (SD))    | 0.05 (0.22)   | 0.04 (0.20)   | 0.06 (0.24)   | \<0.001 |      |
-| Mechanic_CPR (mean (SD))  | 0.04 (0.20)   | 0.05 (0.21)   | 0.03 (0.18)   | \<0.001 |      |
+| Any_drug = 1 (%)          | 50729 (86.5)  | 29977 (87.5)  | 20752 ( 85.1) | \<0.001 |      |
+| Epinephrine = 1 (%)       | 48813 (83.2)  | 29891 (87.2)  | 18922 ( 77.6) | \<0.001 |      |
+| Amiodarone = 1 (%)        | 2872 ( 4.9)   | 1376 ( 4.0)   | 1496 ( 6.1)   | \<0.001 |      |
+| Mechanic_CPR = 1 (%)      | 2395 ( 4.1)   | 1620 ( 4.7)   | 775 ( 3.2)    | \<0.001 |      |
 
 ### Build scoring model using AutoScore
 
@@ -384,7 +387,7 @@ cases equally well across all groups. This can be assessed by comparing
 the difference in TPR from the reference group across groups.
 Differences close to 0 indicate minimal bias.
 
-Equalised odds ensures that different groups have the same true positive
+Equalised odds ensure that different groups have the same true positive
 rate (TPR) and false positive rate (FPR), meaning the model is equally
 accurate and equally prone to errors across all groups. This can be
 assessed by comparing the differences in each group’s TPR and FPR from

@@ -40,12 +40,15 @@ Load the final cohort prepared from the ROC data. Based on AutoScore
 requirements, ROSC status has been renamed to `label`.
 
 ```{r}
-dat <- readRDS("dat_roc.RDS") 
+dat <- readRDS("dat_roc.RDS")
 head(dat)
 # Confirm the data conforms to AutoScore requirements:
 check_data(dat)
 # Generate descriptive table for the final cohort (Supplementary Table S2):
-compute_descriptive_table(dat)
+dat %>%
+  mutate(Any_drug = factor(Any_drug), Epinephrine = factor(Epinephrine), 
+         Amiodarone = factor(Amiodarone), Mechanic_CPR = factor(Mechanic_CPR)) %>%
+  compute_descriptive_table()
 ```
 
 ### Build scoring model using AutoScore
