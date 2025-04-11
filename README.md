@@ -12,13 +12,13 @@ There is increasing emphasis on fairness in artificial intelligence (AI)
 prediction models to enable their responsible adoption in high-stakes
 domains such as healthcare and criminal justice. Guidelines and
 implementation frameworks highlight the importance of both predictive
-accuracy and equitable outcomes. However, existing toolkits often assess
-fairness in isolation, focusing on disparities in classification
-performance between subgroups while placing less emphasis on other
-critical aspects, such as calibration. To address these gaps, we present
-seeBias, an R package that provides comprehensive evaluation of model
-fairness and predictive performance, offering a more complete view of
-model behavior across classification, calibration, and beyond.
+accuracy and equitable outcomes. However, current fairness toolkits
+often evaluate classification performance disparities in isolation, with
+limited attention to other critical aspects such as calibration. To
+address these gaps, we present seeBias, an R package that provides
+comprehensive evaluation of model fairness and predictive performance,
+offering a more complete view of model behavior across classification,
+calibration, and beyond.
 
 As visually summarized in the figure below, the seeBias package has
 three main components:
