@@ -10,9 +10,9 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, warning = FALSE,
                       fig.width = 5, fig.height = 5)
 ```
 
-This guide book completely reproduces Case Study 2 in the paper *seeBias: A
-Comprehensive Tool for Assessing and Visualizing Fairness in AI Prediction
-Models*, which evaluates bias across race groups when predicting return of
+This guide book completely reproduces Case Study 2 in the paper 
+*seeBias: A Comprehensive Tool for Assessing and Visualizing AI Fairness*, 
+which evaluates bias across race groups when predicting return of
 spontaneous circulation (ROSC) among out-of-hospital cardiac arrest (OHCA)
 patients using data from the Resuscitation Outcomes Consortium (ROC) Cardiac
 Epidemiologic Registry (Version 3).

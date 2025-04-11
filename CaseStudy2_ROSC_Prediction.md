@@ -10,12 +10,11 @@ Case Study 2: Clinical Fairness Evaluation in ROSC Prediction
   - [Visualise fairness metrics](#visualise-fairness-metrics)
 
 This guide book completely reproduces Case Study 2 in the paper
-*seeBias: A Comprehensive Tool for Assessing and Visualizing Fairness in
-AI Prediction Models*, which evaluates bias across race groups when
-predicting return of spontaneous circulation (ROSC) among
-out-of-hospital cardiac arrest (OHCA) patients using data from the
-Resuscitation Outcomes Consortium (ROC) Cardiac Epidemiologic Registry
-(Version 3).
+*seeBias: A Comprehensive Tool for Assessing and Visualizing AI
+Fairness*, which evaluates bias across race groups when predicting
+return of spontaneous circulation (ROSC) among out-of-hospital cardiac
+arrest (OHCA) patients using data from the Resuscitation Outcomes
+Consortium (ROC) Cardiac Epidemiologic Registry (Version 3).
 
 ## Build scoring model
 
@@ -149,7 +148,7 @@ ranking <- AutoScore_rank(train_set = train_set_no_race, method = "rf", ntree = 
 ##       61.22868       60.71371
 ```
 
-![](CaseStudy2_ROC_files/figure-gfm/rank-1.png)<!-- -->
+![](CaseStudy2_ROSC_Prediction_files/figure-gfm/rank-1.png)<!-- -->
 
 Generate parsimony plot for variable selection:
 
@@ -174,7 +173,7 @@ AUC <- AutoScore_parsimony(
 ## Select 12 Variable(s):  Area under the curve: 0.7014
 ```
 
-![](CaseStudy2_ROC_files/figure-gfm/pars-1.png)<!-- -->
+![](CaseStudy2_ROSC_Prediction_files/figure-gfm/pars-1.png)<!-- -->
 
 Customize the parsimony plot with preferred variable names
 (Supplementary Figure S1):
@@ -203,7 +202,7 @@ p_auc <- data.frame(
 p_auc
 ```
 
-![](CaseStudy2_ROC_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](CaseStudy2_ROSC_Prediction_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 ggsave("output/roc_auc.pdf", width = 6, height = 5)
@@ -260,7 +259,7 @@ cut_vec <- AutoScore_weighting(
 ## ==============  ===========  =====
 ```
 
-![](CaseStudy2_ROC_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](CaseStudy2_ROSC_Prediction_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
     ## ***Performance (based on validation set):
     ## AUC:  0.7002   95% CI: 0.6867-0.7137 (DeLong)
@@ -307,7 +306,7 @@ cut_vec <- AutoScore_weighting(
     ##                 not_1       0  
     ## ==============  ========  =====
 
-![](CaseStudy2_ROC_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+![](CaseStudy2_ROSC_Prediction_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
 
     ## ***Performance (based on validation set, after fine-tuning):
     ## AUC:  0.699   95% CI: 0.6854-0.7125 (DeLong)
@@ -327,7 +326,7 @@ pred_score <- AutoScore_testing(
 )
 ```
 
-![](CaseStudy2_ROC_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](CaseStudy2_ROSC_Prediction_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
     ## ***Performance using AutoScore:
     ## AUC:  0.6913   95% CI: 0.6817-0.701 (DeLong)
@@ -387,7 +386,7 @@ cases equally well across all groups. This can be assessed by comparing
 the difference in TPR from the reference group across groups.
 Differences close to 0 indicate minimal bias.
 
-Equalised odds ensure that different groups have the same true positive
+Equalised odds ensures that different groups have the same true positive
 rate (TPR) and false positive rate (FPR), meaning the model is equally
 accurate and equally prone to errors across all groups. This can be
 assessed by comparing the differences in each group’s TPR and FPR from
@@ -412,7 +411,7 @@ displayed.
 x_plots_score <- plot(x = x_score)
 ```
 
-![](CaseStudy2_ROC_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](CaseStudy2_ROSC_Prediction_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 To save the figure for performance metrics to a PDF file:
 
@@ -460,7 +459,7 @@ p_all <- ggarrange(
 p_all
 ```
 
-![](CaseStudy2_ROC_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](CaseStudy2_ROSC_Prediction_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 ggsave(p_all, filename = "output/roc_other_fairness.pdf", 

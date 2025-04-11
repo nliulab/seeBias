@@ -9,9 +9,9 @@ Case Study 1: Intersectional Bias in Recidivism Prediction
   - [Visualise fairness metrics](#visualise-fairness-metrics)
 
 This guide book completely reproduces Case Study 1 in the paper
-*seeBias: A Comprehensive Tool for Assessing and Visualizing Fairness in
-AI Prediction Models*, which evaluates bias across race and sex when
-predicting two-year recidivism using the COMPAS data.
+*seeBias: A Comprehensive Tool for Assessing and Visualizing AI
+Fairness*, which evaluates bias across race and sex when predicting
+two-year recidivism using the COMPAS data.
 
 ## Build prediction model
 
@@ -50,8 +50,8 @@ knitr::kable(head(compas))
 
 ### Prepare data
 
-Use subset of COMPAS data for Caucasian and African American. Exclude
-race and sex from the prediction model.
+Use subset of COMPAS data for White and Black individuals. Exclude race
+and sex from the prediction model.
 
 ``` r
 dat <- compas %>% filter(Ethnicity %in% c("Caucasian", "African_American"))
@@ -174,7 +174,7 @@ displayed.
 x_plots <- plot(x)
 ```
 
-![](CaseStudy1_COMPAS_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](CaseStudy1_Recidivism_Prediction_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 To save the figure for performance metrics to a PDF file:
 
@@ -219,7 +219,7 @@ p_all <- ggarrange(
 p_all
 ```
 
-![](CaseStudy1_COMPAS_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](CaseStudy1_Recidivism_Prediction_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 ggsave(p_all, filename = "output/compas_other_fairness.pdf", 

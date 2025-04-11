@@ -1,6 +1,6 @@
 Package: seeBias
 Type: Package
-Title: seeBias: Evaluating and Visualizing Bias in AI Models
+Title: seeBias: A Comprehensive Tool for Assessing and Visualizing AI Fairness
 Version: 0.2.0
 Authors@R: c(person("Yilin", "Ning", role = c("aut","cre"), comment = c(ORCID = "0000-0002-6758-4472"),
                     email= "yilin.ning@duke-nus.edu.sg"),

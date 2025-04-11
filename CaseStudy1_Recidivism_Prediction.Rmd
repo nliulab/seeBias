@@ -10,10 +10,10 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, cache = FALSE,
                       fig.height = 4)
 ```
 
-This guide book completely reproduces Case Study 1 in the paper *seeBias: A
-Comprehensive Tool for Assessing and Visualizing Fairness in AI Prediction
-Models*, which evaluates bias across race and sex when predicting two-year
-recidivism using the COMPAS data.
+This guide book completely reproduces Case Study 1 in the paper 
+*seeBias: A Comprehensive Tool for Assessing and Visualizing AI Fairness*, 
+which evaluates bias across race and sex when predicting two-year recidivism
+using the COMPAS data.
 
 ## Build prediction model
 
