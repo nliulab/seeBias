@@ -109,6 +109,10 @@ x_plots$`Number needed for true positive`
 x_plots$`Number needed for true negative`
 ```
 
+## Citation
+
+- Ning Y, Ma Y, Liu M, Li X, Liu N. [seeBias: A Comprehensive Tool for Assessing and Visualizing AI Fairness](https://doi.org/10.48550/arXiv.2504.08418). *arXiv* arXiv:2504.08418.
+
 ## Contact
 
 - Yilin Ning (Email: yilin.ning@duke-nus.edu.sg)

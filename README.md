@@ -4,6 +4,7 @@ seeBias: A Comprehensive Tool for Assessing and Visualizing AI Fairness
 - [seeBias Introduction](#seebias-introduction)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Citation](#citation)
 - [Contact](#contact)
 
 ## seeBias Introduction
@@ -121,7 +122,7 @@ cases equally well across all groups. This can be assessed by comparing
 the difference in TPR from the reference group across groups.
 Differences close to 0 indicate minimal bias.
 
-Equalised odds ensures that different groups have the same true positive
+Equalised odds ensure that different groups have the same true positive
 rate (TPR) and false positive rate (FPR), meaning the model is equally
 accurate and equally prone to errors across all groups. This can be
 assessed by comparing the differences in each group’s TPR and FPR from
@@ -180,6 +181,13 @@ x_plots$`Number needed for true negative`
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+## Citation
+
+- Ning Y, Ma Y, Liu M, Li X, Liu N. [seeBias: A Comprehensive Tool for
+  Assessing and Visualizing AI
+  Fairness](https://doi.org/10.48550/arXiv.2504.08418). *arXiv*
+  arXiv:2504.08418.
 
 ## Contact
 
