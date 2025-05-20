@@ -15,7 +15,9 @@ evaluate_prediction_prob(
   y_obs,
   y_pos = "1",
   sens_var,
-  sens_var_ref = NULL
+  sens_var_ref = NULL,
+  B = 1000,
+  conf_level = 0.95
 )
 
 evaluate_prediction_score(
@@ -24,7 +26,9 @@ evaluate_prediction_score(
   y_obs,
   y_pos = "1",
   sens_var,
-  sens_var_ref = NULL
+  sens_var_ref = NULL,
+  B = 1000,
+  conf_level = 0.95
 )
 
 evaluate_prediction_bin(
@@ -32,7 +36,9 @@ evaluate_prediction_bin(
   y_obs,
   y_pos = "1",
   sens_var,
-  sens_var_ref = NULL
+  sens_var_ref = NULL,
+  B = 1000,
+  conf_level = 0.95
 )
 
 \method{plot}{seeBias}(x, print_statistics = TRUE, y = NULL, ...)
@@ -61,6 +67,10 @@ encoding.}
 
 \item{sens_var_ref}{Reference class(es) of sensitive variable(s). Default is the
 default reference category in \code{sens_var}.}
+
+\item{B}{Number of bootstrap samples generated with replacement. Default is 1000.}
+
+\item{conf_level}{Confidence level of the CI. Default is 0.95.}
 
 \item{x}{\code{seeBias} object}
 

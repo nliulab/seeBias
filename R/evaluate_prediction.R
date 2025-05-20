@@ -1,4 +1,5 @@
 #' Evaluate algorithm fairness across patient subgroups based on predicted probabilities
+#' @inheritParams eval_pred
 #' @param y_pred A numeric vector of predicted probabilities. Should not contain
 #'   missing value.
 #' @param y_pred_threshold Threshold for \code{y_pred}. Predict positive label
@@ -18,7 +19,8 @@
 #' @export
 evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
                                      y_obs, y_pos = "1",
-                                     sens_var, sens_var_ref = NULL) {
+                                     sens_var, sens_var_ref = NULL,
+                                     B = 1000, conf_level = 0.95) {
   # Process observation and prediction
   y_obs <- check_obs(y_obs = y_obs, y_pos = y_pos)
   input_pred <- check_pred_prob(
@@ -34,7 +36,8 @@ evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
   # Evaluate fairness
   # Metrics:
   res_metrics <- eval_metrics_based(
-    y_pred_bin = input_pred$y_pred_bin, y_obs = y_obs, sens_var = sens_var
+    y_pred_bin = input_pred$y_pred_bin, y_obs = y_obs, sens_var = sens_var,
+    B = B, conf_level = conf_level
   )
   # Metrics by group:
   df_metrics_group <- eval_metrics_group(
@@ -81,7 +84,8 @@ evaluate_prediction_prob <- function(y_pred, y_pred_threshold = NULL,
 #' @export
 evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
                                       y_obs, y_pos = "1",
-                                      sens_var, sens_var_ref = NULL) {
+                                      sens_var, sens_var_ref = NULL,
+                                      B = 1000, conf_level = 0.95) {
   # Process observation and prediction
   y_obs <- check_obs(y_obs = y_obs, y_pos = y_pos)
   input_pred <- check_pred_score(
@@ -97,7 +101,8 @@ evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
   # Evaluate fairness
   # Metrics:
   res_metrics <- eval_metrics_based(
-    y_pred_bin = input_pred$y_pred_bin, y_obs = y_obs, sens_var = sens_var
+    y_pred_bin = input_pred$y_pred_bin, y_obs = y_obs, sens_var = sens_var,
+    B = B, conf_level = conf_level
   )
   # Metrics by group:
   df_metrics_group <- eval_metrics_group(
@@ -143,7 +148,8 @@ evaluate_prediction_score <- function(y_pred, y_pred_threshold = NULL,
 #'   sensitive group.
 #' @export
 evaluate_prediction_bin <- function(y_pred, y_obs, y_pos = "1",
-                                    sens_var, sens_var_ref = NULL) {
+                                    sens_var, sens_var_ref = NULL,
+                                    B = 1000, conf_level = 0.95) {
   # Process observation and prediction
   y_obs <- check_obs(y_obs = y_obs, y_pos = y_pos)
   y_pred <- check_pred_bin(
@@ -159,7 +165,8 @@ evaluate_prediction_bin <- function(y_pred, y_obs, y_pos = "1",
   # Evaluate fairness: only simple fairness metrics can be computed
   res_metrics <- eval_metrics_based(
     y_pred_bin = y_pred, y_obs = y_obs,
-    sens_var = sens_var
+    sens_var = sens_var,
+    B = B, conf_level = conf_level
   )
   # Compile results
   obj <- list(
@@ -269,7 +276,7 @@ summary.seeBias <- function(object, ...) {
     `Equalised odds as ratio` = "Equalised odds ensures that different groups have the same true positive rate (TPR) and false positive rate (FPR), meaning the model is equally accurate and equally prone to errors across all groups. This can be assessed by comparing the ratio of each group’s TPR and FPR to those of the reference group across groups. Ratios close to 1 indicate minimal bias.",
     `Equalised odds as difference` = "Equalised odds ensures that different groups have the same true positive rate (TPR) and false positive rate (FPR), meaning the model is equally accurate and equally prone to errors across all groups. This can be assessed by comparing the differences in each group’s TPR and FPR from those of a reference group across groups. Differences close to 0 indicate minimal bias.",
     `BER equality as ratio` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate [TPR]). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. This can be assessed by comparing the ratio of BER to the reference group across groups. Ratios close to 1 indicate minimal bias.",
-    `BER equality as difference` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate [TPR]). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. This can be assessed by comparing the difference in each group's BER from that of the reference group across groups. Differences close to 0 indicate minimal bias."
+    `BER equality as difference` = "Balanced error rate (BER) equality ensures that the BER is consistent across different groups. BER is the average of the false positive rate (FPR) and the false negative rate (FNR, which is 1 minus the true positive rate (TPR)). This means the model’s overall error rate, considering both false positives and false negatives, is uniform across all groups. This can be assessed by comparing the difference in each group's BER from that of the reference group across groups. Differences close to 0 indicate minimal bias."
   )
   obj_summ <- list(fairness_metrics = df_fairness,
                    fairness_metrics_concept = vec_concept,
@@ -279,17 +286,9 @@ summary.seeBias <- function(object, ...) {
   print.summary.seeBias(obj_summ)
   invisible(obj_summ)
 }
-#' @describeIn evaluate_prediction_prob
-#' Summarise fairness metrics
-#' @param object \code{summary.seeBias} object
-#' @param ... Not supported.
-#' @param digits Number of digits to print for fairness metrics. Default is 3.
-#' @param metric_type Whether to quantify fairness as \code{"difference"} or
-#'   \code{"ratio"}. To print both, specify \code{"all"}.
-#' @importFrom knitr kable
-#' @export
-print.summary.seeBias <- function(object, ..., digits = 3,
-                                  metric_type = "difference") {
+#' @inheritParams print.summary.seeBias
+#' Extract columns for printing fairness metrics table
+extract_columns <- function(object, digits, metric_type) {
   metric_type <- match.arg(arg = tolower(metric_type),
                            choices = c("difference", "ratio", "all"))
   df_fairness <- object$fairness_metrics
@@ -320,9 +319,25 @@ print.summary.seeBias <- function(object, ..., digits = 3,
   # Now add count to the table
   df_fairness_print <- merge(object$count, df_fairness_print, by = "Group",
                              sort = FALSE)
+  list(df_fairness_print = df_fairness_print, vec_concept = vec_concept)
+}
+#' @describeIn evaluate_prediction_prob
+#' Summarise fairness metrics
+#' @param object \code{summary.seeBias} object
+#' @param ... Not supported.
+#' @param digits Number of digits to print for fairness metrics. Default is 3.
+#' @param metric_type Whether to quantify fairness as \code{"difference"} or
+#'   \code{"ratio"}. To print both, specify \code{"all"}.
+#' @importFrom knitr kable
+#' @export
+print.summary.seeBias <- function(object, ..., digits = 3,
+                                  metric_type = "difference") {
+  obj_fairness_print <- extract_columns(object = object, digits = digits,
+                                       metric_type = metric_type)
   # Now display the table
-  print(knitr::kable(df_fairness_print, digits = digits, row.names = FALSE))
+  print(knitr::kable(obj_fairness_print$df_fairness_print, digits = digits,
+                     row.names = FALSE))
   cat("\n")
   # cat("The reference group is", object$sens_var_ref, "\n\n")
-  for (v in vec_concept) cat(v, "\n\n")
+  for (v in obj_fairness_print$vec_concept) cat(v, "\n\n")
 }

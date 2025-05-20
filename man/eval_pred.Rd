@@ -4,7 +4,7 @@
 \alias{eval_pred}
 \title{Evaluates fairness metrics within a subject group}
 \usage{
-eval_pred(y_pred_bin, y_obs, y_pos = "1")
+eval_pred(y_pred_bin, y_obs, y_pos = "1", B = 1000, conf_level = 0.95)
 }
 \arguments{
 \item{y_pred_bin}{Predicted class label.}
@@ -13,9 +13,13 @@ eval_pred(y_pred_bin, y_obs, y_pos = "1")
 
 \item{y_pos}{Character representing positive class. Default is "1" for 0/1
 encoding.}
+
+\item{B}{Number of bootstrap samples generated with replacement. Default is 1000.}
+
+\item{conf_level}{Confidence level of the CI. Default is 0.95.}
 }
 \value{
-Returns a data.frame of metrics with Clopper–Pearson 95\% CI
+Returns a data.frame of metrics with bootstrap 95\% CI
 }
 \description{
 Evaluates fairness metrics within a subject group

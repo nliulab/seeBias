@@ -4,7 +4,7 @@
 #' @param sens_var Sensitive variable.
 #' @return Returns a list of \code{df_prob} (predicted vs observed probability)
 #'   and \code{df_metrics} (predictive performance).
-eval_metrics_based <- function(y_pred_bin, y_obs, sens_var) {
+eval_metrics_based <- function(y_pred_bin, y_obs, sens_var, B, conf_level) {
   y_pos <- "1"
   sens_var_ref <- levels(sens_var)[1]
   # Estimated and observed probabilities
@@ -26,7 +26,8 @@ eval_metrics_based <- function(y_pred_bin, y_obs, sens_var) {
     p_obs_ci <- compute_ci_prop(p = p_obs, n = length(i))
     cbind(
       group = var,
-      eval_pred(y_pred_bin = y_pred_bin[i], y_obs = y_obs[i], y_pos = y_pos)
+      eval_pred(y_pred_bin = y_pred_bin[i], y_obs = y_obs[i], y_pos = y_pos,
+                B = B, conf_level = conf_level)
     )
   }))
   df_metrics$group <- configure_group(group = df_metrics$group,
@@ -34,7 +35,7 @@ eval_metrics_based <- function(y_pred_bin, y_obs, sens_var) {
   df_metrics$ratio <- df_metrics$est /
     df_metrics$est[which(df_metrics$group == sens_var_ref)]
   df_metrics$metric <- factor(df_metrics$metric,
-                              levels = rev(unique(df_metrics$metric)))
+                              levels = rev(levels(df_metrics$metric)))
   list(df_prob = df_prob, df_metrics = df_metrics)
 }
 #' Compute ROC curves

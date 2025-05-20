@@ -4,7 +4,7 @@
 \alias{eval_metrics_based}
 \title{Evaluate performance-based metrics}
 \usage{
-eval_metrics_based(y_pred_bin, y_obs, sens_var)
+eval_metrics_based(y_pred_bin, y_obs, sens_var, B, conf_level)
 }
 \arguments{
 \item{y_pred_bin}{Processed predicted label.}

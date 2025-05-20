@@ -94,7 +94,9 @@ Evaluate intersectional bias across race and gender:
 x <- dat %>% select(Ethnicity, Sex) %>% evaluate_prediction_prob(
   y_pred = predict(m, newdata = dat, type = "response"), 
   y_obs = dat$Two_yr_Recidivism, y_pos = "1",
-  sens_var = ., sens_var_ref = c("White", "Male")
+  sens_var = ., sens_var_ref = c("White", "Male"), 
+  # For demonstration, use 200 bootstrap samples to compute CI for performance metrics
+  B = 200, conf_level = 0.95
 )
 ## Threshold=0.440 set by ROC analysis.
 ## Configuring sensitive variables ...
@@ -122,7 +124,7 @@ cases equally well across all groups. This can be assessed by comparing
 the difference in TPR from the reference group across groups.
 Differences close to 0 indicate minimal bias.
 
-Equalised odds ensure that different groups have the same true positive
+Equalised odds ensures that different groups have the same true positive
 rate (TPR) and false positive rate (FPR), meaning the model is equally
 accurate and equally prone to errors across all groups. This can be
 assessed by comparing the differences in each group’s TPR and FPR from
@@ -132,7 +134,7 @@ indicate minimal bias.
 Balanced error rate (BER) equality ensures that the BER is consistent
 across different groups. BER is the average of the false positive rate
 (FPR) and the false negative rate (FNR, which is 1 minus the true
-positive rate \[TPR\]). This means the model’s overall error rate,
+positive rate (TPR)). This means the model’s overall error rate,
 considering both false positives and false negatives, is uniform across
 all groups. This can be assessed by comparing the difference in each
 group’s BER from that of the reference group across groups. Differences

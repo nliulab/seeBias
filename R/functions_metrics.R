@@ -1,40 +1,8 @@
-#' Compute performance metrics with Clopper–Pearson 95\% CI
-#' @param numerator Numerator for performance metrics formula.
-#' @param denominator Denominator for performance metrics formula.
-#' @param alpha Target error rate. Default is 0.05 for 95\% CI.
-#' @return Returns a data.frame of the performance metrics (\code{est}) and the
-#'   95\% CI (\code{lower}, \code{upper}). Consistent with the 95\% CI of
-#'   accuracy returned from \code{carret::confusionMatrix} and
-#'   \code{epiR::epi.tests} (default setting).
-#' @references
-#' \itemize{
-#'  \item{Clopper CJ, Pearson ES. The use of confidence or fiducial limits illustrated in the case of the binomial. Biometrika. 1934 Dec 1;26(4):404-13.}
-#' }
-#' @importFrom stats qf
-compute_ci_cp <- function(numerator, denominator, alpha = 0.05) {
-  # Need to slightly modify the original formula for the 95% CI because we are
-  # calculating for "failures", not "success" as in original paper
-  x <- denominator - numerator
-  n <- denominator
-  f_ub <- suppressWarnings(
-    qf(p = alpha / 2, df1 = 2 * x, df2 = 2 * (n - x + 1))
-  )
-  ub <- 1 - (1 + (n - x + 1) / (x * f_ub)) ^ -1
-  f_lb <- suppressWarnings(
-    qf(p = 1 - alpha / 2, df1 = 2 * (x + 1), df2 = 2 * (n - x))
-  )
-  lb <- 1 - (1 + (n - x) / ((x + 1) * f_lb)) ^ -1
-  if (numerator == denominator & is.na(ub)) ub <- 1
-  if (numerator == 0 & is.na(lb)) lb <- 0
-  data.frame(est = numerator / denominator, lower = lb, upper = ub)
-}
-#' Evaluates fairness metrics within a subject group
-#' @param y_pred_bin Predicted class label.
-#' @param y_obs Observed class label.
-#' @param y_pos Character representing positive class. Default is "1" for 0/1
-#'   encoding.
-#' @return Returns a data.frame of metrics with Clopper–Pearson 95\% CI
-eval_pred <- function(y_pred_bin, y_obs, y_pos = "1") {
+#' Compute selected performance metrics
+#' @inheritParams eval_pred
+#' @returns Returns a data.frame of the names (\code{metric}) and estimated
+#'   values (\code{est}) of the performance metrics.
+compute_metrics <- function(y_pred_bin, y_obs, y_pos = "1") {
   y_pred_bin <- factor(y_pred_bin)
   y_obs <- factor(y_obs)
   n <- length(y_obs)
@@ -43,16 +11,51 @@ eval_pred <- function(y_pred_bin, y_obs, y_pos = "1") {
   TN <- sum(y_pred_bin == y_neg & y_obs == y_neg)
   FP <- sum(y_pred_bin == y_pos & y_obs == y_neg)
   FN <- sum(y_pred_bin == y_neg & y_obs == y_pos)
-  df <- cbind(
-    metric = c("Accuracy", "PPV", "NPV", "TPR", "FPR", "TNR"),
-    rbind(compute_ci_cp(numerator = TP + TN, denominator = n),
-          compute_ci_cp(numerator = TP, denominator = TP + FP),
-          compute_ci_cp(numerator = TN, denominator = TN + FN),
-          compute_ci_cp(numerator = TP, denominator = TP + FN),
-          compute_ci_cp(numerator = FP, denominator = FP + TN),
-          compute_ci_cp(numerator = TN, denominator = FP + TN))
+  df <- data.frame(
+    metric = c("Accuracy", "Balanced\nAccuracy", "PPV", "NPV", "TPR", "FPR", "TNR"),
+    est = c((TP + TN) / n, (TP / (TP + FN) + TN / (TN + FP)) / 2,
+            TP / (TP + FP), TN / (TN + FN),
+            TP / (TP + FN), FP / (FP + TN), TN / (FP + TN))
   )
-  df
+  df$metric <- factor(df$metric, levels = df$metric)
+  df[sort.list(df$metric), ]
+}
+#' Computes selected performance metrics and bootstrap confidence interval (CI)
+#' @inheritParams eval_pred
+#' @returns Returns a data.frame generated from \code{compute_metrics()}, with
+#'   two additional columns \code{lower} and \code{upper} of the bootstrap CI
+#'   derived based on the quartiles of the bootstrap samples.
+#' @importFrom stats quantile
+compute_ci_boot <- function(y_pred_bin, y_obs, y_pos, B, conf_level) {
+  set.seed(1234)
+  df <- compute_metrics(y_pred_bin = y_pred_bin, y_obs = y_obs, y_pos = y_pos)
+  n <- length(y_pred_bin)
+  df_boot <- do.call("rbind", lapply(1:B, function(b) {
+    idx <- sample(1:n, size = n, replace = TRUE)
+    y_obs_b <- y_obs[idx]
+    y_pred_bin_b <- y_pred_bin[idx]
+    df <- compute_metrics(y_pred_bin = y_pred_bin_b, y_obs = y_obs_b, y_pos = y_pos)
+    cbind(b = b, df)
+  }))
+  alpha <- 1 - conf_level
+  ci_boot <- do.call("rbind", tapply(df_boot$est, df_boot$metric, function(x) {
+    quantile(x, probs = c(alpha/2, 1 - alpha/2), na.rm = TRUE)
+  }))
+  df_ci <- data.frame(metric = rownames(ci_boot),
+                      lower = ci_boot[, 1], upper = ci_boot[, 2])
+  merge(x = df, y = df_ci, by = "metric")
+}
+#' Evaluates fairness metrics within a subject group
+#' @param y_pred_bin Predicted class label.
+#' @param y_obs Observed class label.
+#' @param y_pos Character representing positive class. Default is "1" for 0/1
+#'   encoding.
+#' @param B Number of bootstrap samples generated with replacement. Default is 1000.
+#' @param conf_level Confidence level of the CI. Default is 0.95.
+#' @returns Returns a data.frame of metrics with bootstrap 95\% CI
+eval_pred <- function(y_pred_bin, y_obs, y_pos = "1", B = 1000, conf_level = 0.95) {
+  compute_ci_boot(y_pred_bin = y_pred_bin, y_obs = y_obs, y_pos = y_pos,
+                  B = B, conf_level = conf_level)
 }
 #' Compute 95\% CI for a proportion
 #' @param p The proportion.

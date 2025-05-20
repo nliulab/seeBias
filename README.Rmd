@@ -69,7 +69,9 @@ Evaluate intersectional bias across race and gender:
 x <- dat %>% select(Ethnicity, Sex) %>% evaluate_prediction_prob(
   y_pred = predict(m, newdata = dat, type = "response"), 
   y_obs = dat$Two_yr_Recidivism, y_pos = "1",
-  sens_var = ., sens_var_ref = c("White", "Male")
+  sens_var = ., sens_var_ref = c("White", "Male"), 
+  # For demonstration, use 200 bootstrap samples to compute CI for performance metrics
+  B = 200, conf_level = 0.95
 )
 ```
 
