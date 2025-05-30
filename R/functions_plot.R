@@ -73,8 +73,7 @@ plot_metrics <- function(x) {
 
 #' Private function to plot ROC curves
 #' @inheritParams plot.seeBias
-#' @param print_statistics Whether to print calibration slope in the plot
-#'   legend.
+#' @param print_statistics Whether to print statistics in the plot legend.
 #' @import ggplot2
 #' @importFrom rlang .data
 plot_roc <- function(x, print_statistics) {
